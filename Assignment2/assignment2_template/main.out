@@ -1,0 +1,12 @@
+\BOOKMARK [1][-]{section.1}{Deep Q-Networks \(DQN\) \(8 pts writeup\)}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Written Questions \(8 pts\)}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{Policy Gradient Methods \(54 pts coding + 21 pts writeup\)}{}% 3
+\BOOKMARK [2][-]{subsection.2.1}{REINFORCE}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Baseline}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.3}{Advantage Normalization}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.4}{Proximal Policy Optimization}{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.5}{Coding Questions \(54 pts\)}{section.2}% 8
+\BOOKMARK [2][-]{subsection.2.6}{Debugging}{section.2}% 9
+\BOOKMARK [2][-]{subsection.2.7}{Writeup Questions \(21 pts\)}{section.2}% 10
+\BOOKMARK [1][-]{section.3}{Distributions induced by a policy \(14 pts\)}{}% 11
+\BOOKMARK [1][-]{section.4}{Ethical concerns with Policy Gradients \(5 pts\)}{}% 12
