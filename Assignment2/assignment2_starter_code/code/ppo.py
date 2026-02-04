@@ -47,7 +47,23 @@ class PPO(PolicyGradient):
 
         #######################################################
         #########   YOUR CODE HERE - 10-15 lines.   ###########
+        # Get current action distribution and compute log probabilities
+        distribution = self.policy.action_distribution(observations)
+        new_logprobs = distribution.log_prob(actions)
 
+        # Compute ratio (using exponential of difference of log probs)
+        ratio = torch.exp(new_logprobs - old_logprobs)
+
+        # Compute clipped objective
+        clipped_ratio = torch.clamp(ratio, 1 - self.eps_clip, 1 + self.eps_clip)
+        loss_unclipped = ratio * advantages
+        loss_clipped = clipped_ratio * advantages
+        loss = -torch.mean(torch.min(loss_unclipped, loss_clipped))
+
+        # Backpropagate and update
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         #######################################################
         #########          END YOUR CODE.          ############
 

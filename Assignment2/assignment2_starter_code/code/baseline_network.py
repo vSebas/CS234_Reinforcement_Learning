@@ -27,7 +27,13 @@ class BaselineNetwork(nn.Module):
 
         #######################################################
         #########   YOUR CODE HERE - 2-8 lines.   #############
-
+        self.network = build_mlp(
+            observation_dim,
+            1,
+            self.config.n_layers,
+            self.config.layer_size
+        )
+        self.optimizer = torch.optim.Adam(self.network.parameters(), lr=self.lr)
         #######################################################
         #########          END YOUR CODE.          ############
 
@@ -51,7 +57,7 @@ class BaselineNetwork(nn.Module):
         """
         #######################################################
         #########   YOUR CODE HERE - 1 lines.     #############
-
+        output = self.network(observations).squeeze()
         #######################################################
         #########          END YOUR CODE.          ############
         assert output.ndim == 1
@@ -79,7 +85,8 @@ class BaselineNetwork(nn.Module):
         observations = np2torch(observations)
         #######################################################
         #########   YOUR CODE HERE - 1-4 lines.   ############
-
+        baseline_values = self(observations).cpu().detach().numpy()
+        advantages = returns - baseline_values
         #######################################################
         #########          END YOUR CODE.          ############
         return advantages
@@ -101,6 +108,15 @@ class BaselineNetwork(nn.Module):
         observations = np2torch(observations)
         #######################################################
         #########   YOUR CODE HERE - 4-10 lines.  #############
+        # Compute baseline predictions
+        baseline_predictions = self(observations)
 
+        # Compute MSE loss
+        loss = torch.nn.functional.mse_loss(baseline_predictions, returns)
+
+        # Backpropagate and update
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         #######################################################
         #########          END YOUR CODE.          ############

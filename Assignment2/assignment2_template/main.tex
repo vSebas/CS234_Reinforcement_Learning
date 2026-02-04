@@ -169,7 +169,7 @@ Please review any additional instructions posted on the assignment page at
 \href{http://web.stanford.edu/class/cs234/assignments.html}{http://web.stanford.edu/class/cs234/assignments.html}. When you are ready to submit, please
 follow the instructions on the course website. 
 \\[1em]
-Submissions are composed of 3 parts: Assignment 2 Written (PDF file), Assignment 2 LaTeX Written (.zip file), and Assignment 2 Coding (.zip file). 
+Submissions are composed of 3 parts: Assignment 2 Written (PDF file), Assignment 2 LaTeX Written (.zip file), and Assignment 2 Coding (.zip file) 
 \end{framed}
 
 \section{Deep $Q$-Networks (DQN) (8 pts writeup)}
@@ -234,7 +234,7 @@ The neural network is replaced with a table Q[s,a], and you do not use replay bu
 \begin{itemize}
     \item Line 1-2: delete
     \item Line 3: Initialize Q-table Q(s,a) arbitrarily (0 for all s,a)
-    \item Line 8: change to \[at = arg max_a Q(st, a)\] (drop weights)
+    \item Line 8: change to \[a_t = \arg \max_a Q(st, a)\] (drop weights)
     \item Line 10-12: delete (no mini-batch loop)
     \item Update subscripts from j to t
     \item Line 16: update to Q-table
@@ -259,7 +259,7 @@ Answer:
 Tabular methods blow up when the state or action spaces are huge or continuous. 
 
 In the Mars Rover example, we could replace the 7 discrete states to something that includes position, velocity, acceleration, orientation, battery level, etc. Then the size of $\mathcal{S}$ becomes massive, and makes the table useless.
-The action space could also change to consider continuous wheel torques or steering angles instead of left/right actions. Then $\mathcal{A}$ is continuous and $\max_{⁡a^'} Q(s',a')$ over a table becomes impossible
+The action space could also change to consider continuous wheel torques or steering angles instead of left/right actions. Then $\mathcal{A}$ is continuous and $\max_{⁡a^'} \, Q(s',a')$ over a table becomes impossible
 
 %%%%% End of 1(b) %%%%%
 \end{tcolorbox}
@@ -370,7 +370,7 @@ In \texttt{baseline\_network.py}, you need to implement:
 
 \emph{Tip 1: Make sure to check the dimensions of your output.}
 
-\emph{Tip 2: Use \texttt{self(observations)} to invoke the \texttt{forward} call instead of directly referencing the network (so that the shape is correct).}
+\emph{Tip 2: Use \texttt{self(observations)} to invoke the \texttt{forward} call instead of directly referencing the network (so that the shape is correct)}
    
 In \texttt{ppo.py}, you need to implement:
 \begin{itemize}
@@ -406,7 +406,7 @@ Answer:
 
 Given rewards $r_0, \dots, r_{T-1}$ for one trajectory and discount $\gamma\in(0,1)$, compute the returns backwards: 
 \[
-  G_{T-1}=r_{T-1},\qquad G_t=r_t+\gamma G_{t+1}\quad \text{for } t=T-2,\dots,0.
+  G_{T-1}=r_{T-1},\qquad G_t=r_t+\gamma G_{t+1}\quad \text{for } t=T-2,\dots,0
 \]
 
 The backwards pass takes $O(T)$ time.
@@ -420,22 +420,23 @@ Express these cases mathematically and explain why PPO behaves in this manner.
 \begin{tcolorbox}[breakable]
 %%%%% Start of 2(b) %%%%%
 Answer:
+
 The PPO clipped objective at time $t$ is
 \[
-  L_t^{\mathrm{clip}}(\theta)=\min\Big(z_t(\theta)\hat A_t,\ \mathrm{clip}(z_t(\theta),1-\epsilon,1+\epsilon)\hat A_t\Big).
+  L_t^{\mathrm{clip}}(\theta)=\min\Big(z_t(\theta)\hat A_t,\ \mathrm{clip}(z_t(\theta),1-\epsilon,1+\epsilon)\hat A_t\Big)
 \]
 
 where
 \[
-  z_t(\theta)=\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}.
+  z_t(\theta)=\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}
 \]
 
 %Ignoring non-differentiability exactly at the clipping boundary and assuming gradients flow only through the selected branch of the $\min$, 
 The gradient w.r.t.\ $\theta$ is zero in:
-\begin{enumerate}[leftmargin=2em]
-  \item If $\hat A_t>0$ and $z_t(\theta)\ge 1+\epsilon$, then the min chooses $(1+\epsilon)\hat A_t$ is selected and is constant in $\theta$, so $\nabla_\theta L_t^{\mathrm{clip}}(\theta)=0$.
-  \item If $\hat A_t<0$ and $z_t(\theta)\le 1-\epsilon$, then the min chooses $(1-\epsilon)\hat A_t$ is selected and is constant in $\theta$, so $\nabla_\theta L_t^{\mathrm{clip}}(\theta)=0$.
-  \item If $\hat A_t=0$, then $L_t^{\mathrm{clip}}(\theta)=0$ regardless of $\theta$, so $\nabla_\theta L_t^{\mathrm{clip}}(\theta)=0$.
+\begin{enumerate}
+  \item If $\hat A_t>0$ and $z_t(\theta)\ge 1+\epsilon$, then the min chooses $(1+\epsilon)\hat A_t$ is selected and is constant in $\theta$, so $\nabla_\theta L_t^{\mathrm{clip}}(\theta)=0$
+  \item If $\hat A_t<0$ and $z_t(\theta)\le 1-\epsilon$, then the min chooses $(1-\epsilon)\hat A_t$ is selected and is constant in $\theta$, so $\nabla_\theta L_t^{\mathrm{clip}}(\theta)=0$
+  \item If $\hat A_t=0$, then $L_t^{\mathrm{clip}}(\theta)=0$ regardless of $\theta$, so $\nabla_\theta L_t^{\mathrm{clip}}(\theta)=0$
 \end{enumerate}
 
 PPO behaves like this as it stops pushing the policy further once the probability ratio moves too far from 1 in the “helpful” direction for that sample
@@ -451,11 +452,11 @@ Answer:
 
 REINFORCE uses the on-policy gradient
 \[
-  \nabla_\theta J(\theta)\approx \sum_{t}\nabla_\theta \log \pi_\theta(a_t\mid s_t)\, G_t,
+  \nabla_\theta J(\theta)\approx \sum_{t}\nabla_\theta \log \pi_\theta(a_t\mid s_t)\, G_t
 \]
 so one can compute $\log\pi_\theta(a_t\mid s_t)$ directly with current $\theta$ at update time. In contrast, PPO explicitly uses the ratio
 \[
-  z_t(\theta)=\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)},
+  z_t(\theta)=\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)}
 \]
 During PPO optimization, $\theta$ changes over multiple epochs, but $\pi_{\theta_{\mathrm{old}}}$ must remain fixed as the behavior policy that generated the data. Therefore PPO must store $\log\pi_{\theta_{\mathrm{old}}}(a_t\mid s_t)$  to compute $z_t(\theta)$ during updates.
 
@@ -470,7 +471,7 @@ python main.py --env-name ENV --seed SEED --METHOD
 \end{tcolorbox}
 \texttt{ENV} should be \texttt{cartpole}, \texttt{pendulum}, or \texttt{cheetah}, \texttt{METHOD} should be either \texttt{baseline}, \texttt{no-baseline}, or \texttt{ppo}, and \texttt{SEED} should be a positive integer.
 
-For the \texttt{cartpole} and \texttt{pendulum} environments, we will consider 3 seeds (\texttt{seed = 1, 2, 3}). For \texttt{cheetah}, we will only require one seed (\texttt{seed = 1}) since it's more computationally expensive, but we strongly encourage you to run multiple seeds if you are able to. Run each of the algorithms we implemented (PPO, PG with baseline, PG without baseline) across each seed and environment. In total, you should end up with at least 21 runs.
+For the \texttt{cartpole} and \texttt{pendulum} environments, we will consider 3 seeds (\texttt{seed = 1, 2, 3}) For \texttt{cheetah}, we will only require one seed (\texttt{seed = 1}) since it's more computationally expensive, but we strongly encourage you to run multiple seeds if you are able to. Run each of the algorithms we implemented (PPO, PG with baseline, PG without baseline) across each seed and environment. In total, you should end up with at least 21 runs.
 
 Plot the results using:
 \begin{tcolorbox}
@@ -478,7 +479,7 @@ Plot the results using:
 python plot.py --env-name ENV --seeds SEEDS
 \end{verbatim}
 \end{tcolorbox}
-where \texttt{SEEDS} should be a comma-separated list of seeds which you want to plot (e.g. \texttt{--seeds 1,2,3}).\\\\
+where \texttt{SEEDS} should be a comma-separated list of seeds which you want to plot (e.g. \texttt{--seeds 1,2,3})\\\\
 \textbf{\textit{Important:}} Please include the plots (one for each environment) in your write-up, and comment on the performance of each method. \\\\
 Additionally, you must \textbf{submit a single \texttt{.zip} file} to \textit{Assignment 2 -- Written Portion LaTeX Source}. This ZIP file must contain your LaTeX source and all generated plot images.
 
@@ -502,7 +503,34 @@ We provide the following performance benchmarks based on typical baseline soluti
 
 \begin{tcolorbox}[breakable]
 %%%%% Start of 2(d) %%%%%
-    
+Answer:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/results-cartpole.png}
+\caption{CartPole results across seeds 1, 2, 3.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/results-pendulum.png}
+\caption{Pendulum results across seeds 1, 2, 3.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{img/results-cheetah.png}
+\caption{HalfCheetah results with seed 1.}
+\end{figure}
+
+\textbf{CartPole:} All three methods reach the maximum reward of 200. PPO converges fastest, reaching 200 around iteration 20, and maintains the most stable performance.
+
+\textbf{Pendulum:} All methods reach the maximum reward of 1000. PPO converges fastest and maintains the most stable performance at 1000. Both baseline and no-baseline methods reach 1000 but show more variance and periodic drops.
+
+\textbf{HalfCheetah:} PPO is the only method that maintains stable performance, achieving rewards around 350--430 throughout training. Both vanilla PG methods (baseline and no-baseline) meet the benchmark by reaching rewards above 200 at their peaks (baseline: $\sim$654, no-baseline: $\sim$571), but they exhibit instability. The baseline method shows particularly severe degradation later in training.
+
+Results demonstrate the advantage of PPO over vanilla policy gradient: the clipped objective prevents large policy updates that can destabilize learning.
+
 %%%%% End of 2(d) %%%%%
 \end{tcolorbox}
 
@@ -513,14 +541,21 @@ We provide the following performance benchmarks based on typical baseline soluti
 
 Suppose we have a single MDP and two policies for that MDP, $\pi$ and $\pi'$. Naturally, we are often interested in the performance of policies obtained in the MDP, quantified by $V^{\pi}$ and $V^{\pi'}$, respectively. If the reward function and transition dynamics of the underlying MDP are known to us, we can use standard methods for policy evaluation. There are many scenarios, however, where the underlying MDP model is not known and we must try to infer something about the performance of policy $\pi'$ solely based on data obtained through executing policy $\pi$ within the environment. In this problem, we will explore a classic result for quantifying the gap in performance between two policies that only requires access to data sampled from one of the policies. 
 
-Consider an infinite-horizon MDP $\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, \mathcal{R}, \mathcal{P}, \gamma \rangle$ and stochastic policies of the form $\pi: \mathcal{S} \rightarrow \Delta(\mathcal{A})$\footnote{For a finite set $\mathcal{X}$, $\Delta(\mathcal{X})$ refers to the set of categorical distributions with support on $\mathcal{X}$ or, equivalently, the $\Delta^{|\mathcal{X}|-1}$ probability simplex.}. Specifically, $\pi(a|s)$ refers to the probability of taking action $a$ in state $s$, and $\sum_a \pi(a|s) = 1, \text{ } \forall s$. For simplicity, we'll assume that this decision process has a single, fixed starting state $s_{0} \in \mathcal{S}$. 
+Consider an infinite-horizon MDP $\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, R, P, \gamma \rangle$ and stochastic policies of the form $\pi: \mathcal{S} \rightarrow \Delta(\mathcal{A})$\footnote{For a finite set $\mathcal{X}$, $\Delta(\mathcal{X})$ refers to the set of categorical distributions with support on $\mathcal{X}$ or, equivalently, the $\Delta^{|\mathcal{X}|-1}$ probability simplex.}. Specifically, $\pi(a|s)$ refers to the probability of taking action $a$ in state $s$, and $\sum_a \pi(a|s) = 1, \text{ } \forall s$. For simplicity, we'll assume that this decision process has a single, fixed starting state $s_{0} \in \mathcal{S}$. 
 
 \begin{enumerate}
-	\item [(a) (3 pts)] (\textbf{written}) Consider a fixed stochastic policy and imagine running several rollouts of this policy within the environment. Naturally, depending on the stochasticity of the MDP $\mathcal{M}$ and the policy itself, some trajectories are more likely than others. Write down an expression for $\rho^\pi(\tau)$, the probability of sampling a trajectory $\tau = (s_0,a_0,s_1,a_1,\ldots)$ from running $\pi$ in $\mathcal{M}$. To put this distribution in context, recall that $V^\pi(s_0) = \mathbb{E}_{\tau \sim \rho^\pi}\left[\sum\limits_{t=0}^\infty \gamma^t \mathcal{R}(s_t,a_t) \,|\, s_0\right].$ 
+	\item [(a) (3 pts)] (\textbf{written}) Consider a fixed stochastic policy and imagine running several rollouts of this policy within the environment. Naturally, depending on the stochasticity of the MDP $\mathcal{M}$ and the policy itself, some trajectories are more likely than others. Write down an expression for $\rho^\pi(\tau)$, the probability of sampling a trajectory $\tau = (s_0,a_0,s_1,a_1,\ldots)$ from running $\pi$ in $\mathcal{M}$. To put this distribution in context, recall that $V^\pi(s_0) = \mathbb{E}_{\tau \sim \rho^\pi}\left[\sum\limits_{t=0}^\infty \gamma^t R(s_t,a_t) \,|\, s_0\right]$ 
 
  \begin{tcolorbox}[breakable]
 %%%%% Start of 3(a) %%%%%
-Answer: 
+Answer:
+
+The probability of sampling a trajectory $\tau$ from running policy $\pi$ in MDP $\mathcal{M}$ is:
+
+\[
+\rho^\pi(\tau) = \prod_{t=0}^{\infty} \pi(a_t \mid s_t) P(s_{t+1} \mid s_t, a_t)
+\]
+
 %%%%% End of 3(a) %%%%%
 \end{tcolorbox}
 \clearpage
@@ -529,7 +564,16 @@ Answer:
 
 \begin{tcolorbox}[breakable]
 %%%%% Start of 3(b) %%%%%
-Answer: 
+Answer:
+
+Probability $p^\pi(s_t = s)$ can be expressed by marginalizing over all trajectories:
+
+\[
+p^\pi(s_t = s) = \sum_{\tau: s_t = s} \rho^\pi(\tau)
+\]
+
+where the sum is over all trajectories $\tau$ that have $s_t = s$.
+
 %%%%% End of 3(b) %%%%%
 \end{tcolorbox}
 \clearpage
@@ -543,21 +587,134 @@ The value function of a policy $\pi$ can be expressed using this distribution $d
 \end{enumerate}	
 \begin{tcolorbox}[breakable]
 %%%%% Start of 3(c) %%%%%
-Answer: 
+Answer:
+\begin{align*}
+\mathbb{E}_{\tau\sim\rho^\pi}\Big[\sum_{t=0}^{\infty}\gamma^t f(s_t,a_t)\Big]
+&=\sum_{t=0}^{\infty}\gamma^t\,\mathbb{E}_{\tau\sim\rho^\pi}\big[f(s_t,a_t)\big]\\
+&=\sum_{t=0}^{\infty}\gamma^t\sum_s p^\pi(s_t=s)\sum_a \pi(a\mid s)f(s,a)\\
+&=\sum_s\Big(\sum_{t=0}^{\infty}\gamma^t p^\pi(s_t=s)\Big)\sum_a \pi(a\mid s)f(s,a)
+\end{align*}
+
+Following $d^\pi$,
+\[
+  \sum_{t=0}^{\infty}\gamma^t p^\pi(s_t=s)=\frac{d^\pi(s)}{1-\gamma}
+\]
+
+Substituting yields:
+\begin{align*}
+\mathbb{E}_{\tau\sim\rho^\pi}\Big[\sum_{t=0}^{\infty}\gamma^t f(s_t,a_t)\Big]
+&= \frac{1}{1-\gamma}\sum_s d^\pi(s)\sum_a \pi(a\mid s)f(s,a) \\
+&= \frac{1}{1-\gamma} \mathbb{E}_{s \sim d^\pi}\Big[\mathbb{E}_{a \sim \pi(s)}[f(s,a)]\Big]
+\end{align*}
+
+\hfill$\square$
+
 %%%%% End of 3(c) %%%%%
 \end{tcolorbox}
 \clearpage
 
  \begin{enumerate}
     
-    \item [(d) (5 pts)] (\textbf{written}) For any policy $\pi$, we define the following function $$A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s).$$ $A^\pi(s,a)$ is known as the advantage function and shows up in a lot of policy gradient based RL algorithms, which we shall see later in the class. Intuitively, it is the additional benefit one gets from first following action $a$ and then following $\pi$, instead of always following $\pi$. Prove that the following statement holds for all policies $\pi,\pi'$: $$V^\pi(s_0) - V^{\pi'}(s_0) = \frac{1}{(1-\gamma)} \mathbb{E}_{s \sim d^\pi}\left[\mathbb{E}_{a \sim \pi(s)}\left[A^{\pi'}(s,a)\right]\right].$$
+    \item [(d) (5 pts)] (\textbf{written}) For any policy $\pi$, we define the following function $$A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$$ $A^\pi(s,a)$ is known as the advantage function and shows up in a lot of policy gradient based RL algorithms, which we shall see later in the class. Intuitively, it is the additional benefit one gets from first following action $a$ and then following $\pi$, instead of always following $\pi$. Prove that the following statement holds for all policies $\pi,\pi'$: $$V^\pi(s_0) - V^{\pi'}(s_0) = \frac{1}{(1-\gamma)} \mathbb{E}_{s \sim d^\pi}\left[\mathbb{E}_{a \sim \pi(s)}\left[A^{\pi'}(s,a)\right]\right]$$
     \emph{Hint 1: Try adding and subtracting a term that will let you bring $A^{\pi'}(s,a)$ into the equation. What happens when adding and subtracting $\sum\limits_{t=0}^\infty \gamma^{t+1} V^{\pi'}(s_{t+1})$ on the LHS?} \\
     \emph{Hint 2: Recall the \href{https://en.wikipedia.org/wiki/Law_of_total_expectation}{tower property of expectation} which says that $\mathbb{E}\left[X\right] = \mathbb{E}\left[\mathbb{E}\left[X \mid Y\right]\right]$}. \\
     \emph{Hint 3: It may be useful to define $\tau_t = (s_0, a_0, s_1, a_1, .., s_t, a_t)$ as the partial trajectory until timestep $t$. }\\
      \emph{Hint 4: Result from (c) may be useful.}
 \begin{tcolorbox}[breakable]
 %%%%% Start of 3(d) %%%%%
-Answer: 
+Answer:
+
+The Bellman equation for $Q^{\pi'}$ is
+\[
+Q^{\pi'}(s,a) =
+R(s,a) + \gamma\,\mathbb{E}_{s'\sim P(\cdot\mid s,a)}\left[V^{\pi'}(s')\right]
+\]
+Therefore the advantage can be written as
+\begin{align*}
+A^{\pi'}(s,a)
+&=Q^{\pi'}(s,a)-V^{\pi'}(s)\\
+&=R(s,a) +\gamma\,\mathbb{E}_{s'\sim P(\cdot\mid s,a)}\left[V^{\pi'}(s')\right] -V^{\pi'}(s)
+\end{align*}
+
+By definition,
+\[
+V^\pi(s_0) =
+\mathbb{E}_{\tau\sim \rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^t R(s_t,a_t)\right]
+\]
+Hence,
+\begin{align*}
+V^\pi(s_0)-V^{\pi'}(s_0) &=
+\mathbb{E}_{\tau\sim \rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^t R(s_t,a_t)\right]
+- V^{\pi'}(s_0)
+\end{align*}
+
+Then, add and subtract the quantity
+$\mathbb{E}_{\tau\sim\rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^{t+1}V^{\pi'}(s_{t+1})\right]$:
+\begin{align*}
+V^\pi(s_0)-V^{\pi'}(s_0)
+&=
+\mathbb{E}_{\tau\sim \rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^t R(s_t,a_t)\right]
++ \mathbb{E}_{\tau\sim\rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^{t+1}V^{\pi'}(s_{t+1})\right]\\
+&\quad-\Bigg( \mathbb{E}_{\tau\sim\rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^{t+1}V^{\pi'}(s_{t+1})\right]
++ V^{\pi'}(s_0) \Bigg)
+\end{align*}
+
+Simplify terms in last parenthesis,
+\[
+\sum_{t=0}^{\infty}\gamma^{t+1}V^{\pi'}(s_{t+1}) =
+\sum_{k=1}^{\infty}\gamma^{k}V^{\pi'}(s_k)
+\]
+Therefore,
+\begin{align*}
+\mathbb{E}_{\tau\sim\rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^{t+1}V^{\pi'}(s_{t+1})\right] +V^{\pi'}(s_0)
+&= \mathbb{E}_{\tau\sim\rho^\pi}\left[V^{\pi'}(s_0)+\sum_{k=1}^{\infty}\gamma^{k}V^{\pi'}(s_k)\right]\\
+&= \mathbb{E}_{\tau\sim\rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^{t}V^{\pi'}(s_t)\right]
+\end{align*}
+
+Plugging this back yields
+\begin{align*}
+V^\pi(s_0)-V^{\pi'}(s_0)
+&= \mathbb{E}_{\tau\sim \rho^\pi}\Bigg[\sum_{t=0}^{\infty}\gamma^t\Big(R(s_t,a_t)
++\gamma V^{\pi'}(s_{t+1})-V^{\pi'}(s_t)\Big)\Bigg]
+\end{align*}
+
+For a fixed $t$,
+\[
+X_t = R(s_t,a_t)+\gamma V^{\pi'}(s_{t+1})-V^{\pi'}(s_t)
+\]
+Applying the tower property of expectation,
+\[
+\mathbb{E}_{\tau\sim\rho^\pi}[X_t]=
+\mathbb{E}_{\tau\sim\rho^\pi}\Big[\mathbb{E}\left[X_t \mid s_t,a_t\right]\Big]
+\]
+
+So
+\begin{align*}
+\mathbb{E}\left[
+R(s_t,a_t)+\gamma V^{\pi'}(s_{t+1})\mid s_t,a_t\right]
+&=R(s_t,a_t)+\gamma\,\mathbb{E}_{s'\simP(\cdot\mid s_t,a_t)}[V^{\pi'}(s')]\\
+&=Q^{\pi'}(s_t,a_t)
+\end{align*}
+Therefore,
+\[
+\mathbb{E}\left[X_t \mid s_t,a_t\right]=
+Q^{\pi'}(s_t,a_t)-V^{\pi'}(s_t)=
+A^{\pi'}(s_t,a_t)
+\]
+
+Substituting back into the discounted sum,
+\[
+V^\pi(s_0)-V^{\pi'}(s_0)=
+\mathbb{E}_{\tau\sim \rho^\pi}\left[\sum_{t=0}^{\infty}\gamma^t A^{\pi'}(s_t,a_t)\right]
+\]
+
+From part (c), setting $f(s,a)=A^{\pi'}(s,a)$ gives
+\[
+V^\pi(s_0)-V^{\pi'}(s_0)=
+\frac{1}{1-\gamma}\mathbb{E}_{s\sim d^\pi}\left[\mathbb{E}_{a\sim\pi(s)}\big[A^{\pi'}(s,a)\big]\right]
+\]
+
+
 %%%%% End of 3(d) %%%%%
 \end{tcolorbox}
 \clearpage
@@ -589,20 +746,38 @@ Researchers who experiment on human subjects are morally responsible for ensurin
     \item[(a)] {(4 pts)} In 4-6 sentences, describe \textbf{two} experimental  design or research choices that researchers planning the above experiment ought to make in order to respect these principles. Justify the importance of these choices using one of the three ethical principles above and indicating which principle you have chosen. For example, “Researchers ought to ensure that students advised by the chatbot are able to revise their assignments after submission with the benefit of human advice if needed. If they did not take this precaution, the principle of justice would be violated because the risk of harm from poor advice from the AI chatbot would be distributed unevenly.” 
 \begin{tcolorbox}[breakable]
 %%%%% Start of 4(a) %%%%%
-Answer: 
+Answer:
+
+\textbf{Respect for Persons:} Researchers outh to obtain informed consent from students and clearly state that the study involves an AI chatbot that may be less effective than human assistance, with the option to request human CA help at any time without penalty. This preserves participants’ autonomy.
+
+\textbf{Beneficence:} Researchers ought to monitor student performance and intervene with human support when needed, and ensure access to supplementary human CA review before assessments so participation does not harm learning outcomes.
+
 %%%%% End of 4(a) %%%%%
 \end{tcolorbox}
 \end{enumerate}
 
 \clearpage
 
-At universities, research experiments that involve human subjects are subject by federal law to Institutional Review Board (IRB) approval.  The purpose of IRB is to protect human subjects of research: to “assure, both in advance and by periodic review, that appropriate steps are taken to protect the rights and welfare of humans participating as subjects in the research” (\href{https://www.fda.gov/about-fda/center-drug-evaluation-and-research-cder/institutional-review-boards-irbs-and-protection-human-subjects-clinical-trials}{link to reference}). The IRB process was established in response to abuses of human subjects in the name of medical research performed during WWII (\href{https://www.hhs.gov/ohrp/regulations-and-policy/belmont-report/read-the-belmont-report/index.html#xethical}{link to reference}). The IRB is primarily intended to address the responsibilities of the researcher towards the subjects. Familiarize yourself with Stanford’s IRB Research Compliance process by clicking the \href{https://researchcompliance.stanford.edu/panels/hs/forms/for-researchers#need}{link to reference}.
+At universities, research experiments that involve human subjects are subject by federal law to Institutional Review Board (IRB) approval.  The purpose of IRB is to protect human subjects of research: to “assure, both in advance and by periodic review, that appropriate steps are taken to protect the rights and welfare of humans participating as subjects in the research” (\href{https://www.fda.gov/about-fda/center-drug-evaluation-and-research-cder/institutional-review-boards-irbs-and-protection-human-subjects-clinical-trials}{link to reference}) The IRB process was established in response to abuses of human subjects in the name of medical research performed during WWII (\href{https://www.hhs.gov/ohrp/regulations-and-policy/belmont-report/read-the-belmont-report/index.html#xethical}{link to reference}) The IRB is primarily intended to address the responsibilities of the researcher towards the subjects. Familiarize yourself with Stanford’s IRB Research Compliance process by clicking the \href{https://researchcompliance.stanford.edu/panels/hs/forms/for-researchers#need}{link to reference}.
 
 \begin{enumerate}
     \item[(b)] {(1 pt)} If you were conducting the above experiment, what process would you need to follow at Stanford (who would you email/ where would you upload a research protocol) to get clearance? 
 \begin{tcolorbox}[breakable]
 %%%%% Start of 4(b) %%%%%
-Answer: 
+Answer:
+
+I would need to submit a research protocol through Stanford's IRB (Institutional Review Board) system. According to the website, I would:
+
+\begin{enumerate}
+    \item Create an account and submit the protocol through Stanford's eProtocol system
+    \item Complete the appropriate IRB application form for human subjects research
+    \item Provide detailed information about the study
+    \item Wait for IRB review and approval before beginning any data collection or participant recruitment
+\end{enumerate}
+
+irbnonmed@stanford.edu
+https://eprotocol.stanford.edu/
+
 %%%%% End of 4(b) %%%%%
 \end{tcolorbox}
 \end{enumerate}

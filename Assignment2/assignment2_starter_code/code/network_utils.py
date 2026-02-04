@@ -26,7 +26,21 @@ def build_mlp(input_size, output_size, n_layers, size):
     """
     #######################################################
     #########   YOUR CODE HERE - 7-15 lines.   ############
+    layers = []
 
+    # Input layer
+    layers.append(nn.Linear(input_size, size))
+    layers.append(nn.ReLU())
+
+    # Hidden layers
+    for _ in range(n_layers - 1):
+        layers.append(nn.Linear(size, size))
+        layers.append(nn.ReLU())
+
+    # Output layer (no activation)
+    layers.append(nn.Linear(size, output_size))
+
+    return nn.Sequential(*layers)
     #######################################################
     #########          END YOUR CODE.          ############
 

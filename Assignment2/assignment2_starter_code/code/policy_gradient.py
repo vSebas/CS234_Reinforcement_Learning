@@ -72,7 +72,22 @@ class PolicyGradient(object):
         """
         #######################################################
         #########   YOUR CODE HERE - 8-12 lines.   ############
+        # Build network
+        network = build_mlp(
+            self.observation_dim,
+            self.action_dim,
+            self.config.n_layers,
+            self.config.layer_size
+        )
 
+        # Create policy
+        if self.discrete:
+            self.policy = CategoricalPolicy(network)
+        else:
+            self.policy = GaussianPolicy(network, self.action_dim)
+
+        # Create optimizer
+        self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self.lr)
         #######################################################
         #########          END YOUR CODE.          ############
 
@@ -190,7 +205,12 @@ class PolicyGradient(object):
             rewards = path["reward"]
             #######################################################
             #########   YOUR CODE HERE - 5-10 lines.   ############
-
+            # Compute returns using backwards iteration
+            T = len(rewards)
+            returns = np.zeros(T)
+            returns[-1] = rewards[-1]
+            for t in range(T - 2, -1, -1):
+                returns[t] = rewards[t] + self.config.gamma * returns[t + 1]
             #######################################################
             #########          END YOUR CODE.          ############
             all_returns.append(returns)
@@ -215,7 +235,7 @@ class PolicyGradient(object):
         """
         #######################################################
         #########   YOUR CODE HERE - 1-2 lines.    ############
-
+        normalized_advantages = (advantages - np.mean(advantages)) / (np.std(advantages) + 1e-8)
         #######################################################
         #########          END YOUR CODE.          ############
         return normalized_advantages
@@ -268,7 +288,17 @@ class PolicyGradient(object):
         advantages = np2torch(advantages)
         #######################################################
         #########   YOUR CODE HERE - 5-7 lines.    ############
+        # Get action distribution and compute log probabilities
+        distribution = self.policy.action_distribution(observations)
+        log_probs = distribution.log_prob(actions)
 
+        # Compute loss (negative because we want to maximize)
+        loss = -torch.mean(log_probs * advantages)
+
+        # Backpropagate and update
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         #######################################################
         #########          END YOUR CODE.          ############
 
