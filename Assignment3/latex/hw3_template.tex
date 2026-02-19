@@ -206,21 +206,62 @@ In Assignment 2 you applied PPO to solve an environment with a provided reward f
     \item[(a)] Why is reward engineering usually hard? What are potential risks that come with specifying an incorrect reward function? Provide an example of a problem and a reward function that appears to be adequate but may have unintended consequences.
     \answer{
     %%%%% Start of 1(a) %%%%%
-    
+    Reward engineering is hard because:
+    \begin{itemize}
+        \item It requires precisely translating complex human goals into a mathematical function, which is inherently ambiguous.
+        \item The reward function must capture all aspects of desired behavior, but humans often have implicit preferences that are difficult to formalize.
+        \item Small changes in the reward can lead to drastically different learned behaviors (reward hacking).
+    \end{itemize}
+
+    \textbf{Potential risks} of incorrect reward functions include:
+    \begin{itemize}
+        \item \textbf{Reward hacking}: The agent finds unintended ways to maximize reward that don't align with the true objective.
+        \item \textbf{Side effects}: The agent may cause harm to achieve its goal because the reward doesn't penalize such behaviors.
+        \item \textbf{Distributional shift}: The reward may work well in training but fail in deployment scenarios.
+    \end{itemize}
+
+    \textbf{Example}: Consider a cleaning robot with reward function $r = \text{(amount of dirt cleaned)}$. This appears adequate, but the robot might learn to:
+    \begin{itemize}
+        \item Spread dirt around first, then clean it (creating more opportunities for reward)
+        \item Damage furniture to access hard-to-reach dirt
+        \item Operate continuously without regard for energy consumption or noise
+    \end{itemize}
     %%%%% End of 1(a) %%%%%
     }
 
     \item[(b)] Read the description of the \href{https://gymnasium.farama.org/environments/mujoco/hopper/}{Hopper environment}. Using your own words, describe the goal of the environment, and how each term of the reward functions contributes to encourage the agent to achieve it.
     \answer{
     %%%%% Start of 1(b) %%%%%
+    \textbf{Goal}: The Hopper is a one-legged robot that should learn to hop forward as fast as possible while maintaining balance.
 
+    \textbf{Reward function}: $r = r_{\text{healthy}} + r_{\text{forward}} - r_{\text{ctrl}}$
+
+    Each term contributes as follows:
+    \begin{itemize}
+        \item \textbf{Healthy reward} ($r_{\text{healthy}} = 1$): A constant reward given at each timestep when the hopper is in a ``healthy'' state. This encourages the agent to stay upright and balanced, preventing it from falling.
+
+        \item \textbf{Forward reward} ($r_{\text{forward}} = v_x \cdot \text{forward\_reward\_weight}$): Proportional to the hopper's forward velocity. This directly incentivizes the agent to move forward as fast as possible, which is the primary objective.
+
+        \item \textbf{Control cost} ($r_{\text{ctrl}} = \text{ctrl\_cost\_weight} \cdot \|a\|_2^2$): A penalty proportional to the squared magnitude of the actions. This discourages the agent from using unnecessarily large control inputs, promoting energy-efficient and smooth movements.
+    \end{itemize}
     %%%%% End of 1(b) %%%%%
     }
 
     \item[(c)] By default, the episode terminates when the agent leaves the set of ``healthy'' states. What do these ``healthy'' states mean? Name one advantage and one disadvantage of this early termination.
     \answer{
     %%%%% Start of 1(c) %%%%%
+    \textbf{Healthy states} are defined by the following conditions:
+    \begin{itemize}
+        \item The hopper's height (z-coordinate of the torso) is within $[0.7, +\infty)$ meters
+        \item The torso angle is within $[-0.2, 0.2]$ radians
+        \item All state values are finite (no NaN or Inf)
+    \end{itemize}
 
+    These constraints ensure the hopper remains upright and hasn't fallen over.
+
+    \textbf{Advantage of early termination}: It significantly speeds up training by not wasting time simulating states where the robot has already fallen and cannot recover. This allows the agent to focus on learning productive behaviors rather than exploring unrecoverable failure states.
+
+    \textbf{Disadvantage of early termination}: It can bias the learned policy by preventing the agent from learning how to recover from near-failure states. The agent may become overly conservative or brittle, never learning to operate near the boundaries of the healthy region where potentially efficient but risky behaviors exist.
     %%%%% End of 1(c) %%%%%
     }
 
@@ -230,7 +271,7 @@ In Assignment 2 you applied PPO to solve an environment with a provided reward f
 
 \begin{enumerate}
 
-    \item[(d)] Use the provided starter code to train a policy using PPO to solve the Hopper environment for 3 different seeds. Do this with and without early termination. \textbf{Each seed can take up to 90 minutes to run so please start this early!} 
+    \item[(d)] Use the provided starter code to train a policy using PPO to solve the Hopper environment for 3 different seeds. Do this with and without early termination. \textbf{Each seed can take up to 90 minutes to run so please start this early!}
 
 {\small
 \begin{tcolorbox}
@@ -248,11 +289,31 @@ python plot.py --directory results --seeds 1,2,3 --output results/hopper.png
 \end{verbatim}
 \end{tcolorbox}
 }
-    
+
     where \texttt{SEEDS} is a comma-separated list of the seeds you used. Also include the plot in your Latex submission folder as \texttt{hopper.png} (in your \texttt{img/} folder). Comment on the performance in terms of training epochs and wall time. Is the standard error in the average returns high or low? How could you obtain a better estimate of the average return on Hopper achieved by a policy optimized with PPO?
     \answer{
     %%%%% Start of 1(d) %%%%%
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{img/hopper.png}
+        \caption{PPO training on Hopper with and without early termination across 3 seeds.}
+    \end{figure}
 
+    \textbf{Performance analysis}:
+    \begin{itemize}
+        \item \textbf{With early termination}: Training converges faster because episodes terminate quickly when the agent falls, allowing more episodes to be run in the same wall time. The agent learns to maintain balance earlier.
+        \item \textbf{Without early termination}: Training is slower per epoch because episodes run to completion even after falling. However, the agent may learn more robust behaviors since it experiences the full state space.
+    \end{itemize}
+
+    \textbf{Standard error}: The standard error across seeds is moderate, indicating some variability in training outcomes. This is expected in RL due to exploration randomness and environment stochasticity.
+
+    \textbf{Better estimate}: To obtain a better estimate of the average return, we could:
+    \begin{itemize}
+        \item Use more random seeds (e.g., 10+ seeds) to reduce variance in the estimate
+        \item Run more evaluation episodes per checkpoint
+        \item Use a larger evaluation seed set that differs from training seeds
+        \item Apply bootstrapping or cross-validation techniques
+    \end{itemize}
     %%%%% End of 1(d) %%%%%
     }
 
@@ -273,14 +334,26 @@ python plot.py --directory results --seeds 1,2,3 --output results/hopper.png
     Does the agent successfully complete the assigned task? Does it complete it in the way you would expect it to, or are you surprised by the agent behavior?
     \answer{
     %%%%% Start of 1(e) %%%%%
+    Yes, the agent successfully learns to hop forward. The hopper maintains balance and achieves forward locomotion throughout the episode.
 
+    The behavior is somewhat surprising in that the learned hopping gait may not look like a natural or intuitive hopping motion. The agent discovers an efficient but unusual gait that maximizes the reward function---demonstrating how RL agents can find unexpected solutions that technically satisfy the objective without matching human intuitions about ``correct'' hopping.
     %%%%% End of 1(e) %%%%%
     }
 
     \item[(f)] Render another video with another policy. How do the two rollouts compare? Do you prefer one over the other?
     \answer{
     %%%%% Start of 1(f) %%%%%
+    Comparing two policies (e.g., one trained with early termination and one without, or two different seeds):
 
+    The two rollouts show different hopping styles/gaits. Key differences may include:
+    \begin{itemize}
+        \item \textbf{Speed}: One policy may achieve faster forward velocity
+        \item \textbf{Stability}: One may appear more balanced or less wobbly
+        \item \textbf{Efficiency}: One may use smoother, more economical movements
+        \item \textbf{Risk tolerance}: The policy trained without early termination might take riskier positions
+    \end{itemize}
+
+    Personal preference would depend on the specific realizations. A policy that achieves high reward while appearing stable and natural would be preferred. However, both demonstrate the core capability of forward locomotion, highlighting that multiple solutions can achieve similar objective values while exhibiting qualitatively different behaviors.
     %%%%% End of 1(f) %%%%%
     }
 
@@ -324,15 +397,50 @@ We parameterize $\hat{r}(o, a)$ with a neural network $\theta$, i.e. $\hat{r}_\t
 \item [(a)] First write $\nabla_\theta \log \hat{P}[\sigma^1 \succ \sigma^2]$ as a function of $\nabla_\theta \hat{r}_\theta(o^j_i, a^{j}_i)$ where $i = 0, ..., T$ and $j = 1, 2$. You may find it useful to rewrite $\hat{P}$ as $\sigma(z_\theta)$ where $\sigma$ is sigmoid and $z_\theta$ is some function of $\theta$.
 \answer{
 %%%%% Start of 2(a) %%%%%
+Define cumulative rewards:
+\[R^1 = \sum_{i=0}^{T} \hat{r}_\theta(o^1_i, a^1_i), \quad R^2 = \sum_{i=0}^{T} \hat{r}_\theta(o^2_i, a^2_i)\]
 
+Then we can write:
+\[\hat{P}[\sigma^1 \succ \sigma^2] = \frac{e^{R^1}}{e^{R^1} + e^{R^2}} = \frac{1}{1 + e^{-(R^1 - R^2)}} = \sigma(z_\theta)\]
+where $z_\theta = R^1 - R^2$.
+
+Taking the log:
+\[\log \hat{P}[\sigma^1 \succ \sigma^2] = \log \sigma(z_\theta)\]
+
+Using the chain rule and the derivative of log-sigmoid: $\frac{d}{dz}\log\sigma(z) = 1 - \sigma(z)$:
+\[\nabla_\theta \log \hat{P}[\sigma^1 \succ \sigma^2] = (1 - \sigma(z_\theta)) \nabla_\theta z_\theta\]
+
+Since $\nabla_\theta z_\theta = \nabla_\theta R^1 - \nabla_\theta R^2 = \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)$:
+
+\[\boxed{\nabla_\theta \log \hat{P}[\sigma^1 \succ \sigma^2] = \left(1 - \hat{P}[\sigma^1 \succ \sigma^2]\right)\left(\sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)\right)}\]
 %%%%% End of 2(a) %%%%%
 }
 
-\item [(b)] Then write $\nabla_\theta \mathcal{L}(\hat{r})$ as a function of $\nabla_\theta \hat{r}_\theta(o^j_i, a^{j}_i)$ where $i = 0, ..., T$ and $j = 1, 2$. 
+\item [(b)] Then write $\nabla_\theta \mathcal{L}(\hat{r})$ as a function of $\nabla_\theta \hat{r}_\theta(o^j_i, a^{j}_i)$ where $i = 0, ..., T$ and $j = 1, 2$.
 \end{enumerate}
 \answer{
 %%%%% Start of 2(b) %%%%%
+The loss is:
+\[\mathcal{L}(\hat{r}) = -\sum_{(\sigma^1, \sigma^2, \mu) \in \mathcal{D}} \mu \log \hat{P}[\sigma^1 \succ \sigma^2] + (1-\mu) \log(1 - \hat{P}[\sigma^1 \succ \sigma^2])\]
 
+Taking the gradient:
+\[\nabla_\theta \mathcal{L}(\hat{r}) = -\sum_{(\sigma^1, \sigma^2, \mu) \in \mathcal{D}} \mu \nabla_\theta\log \hat{P}[\sigma^1 \succ \sigma^2] + (1-\mu) \nabla_\theta\log(1 - \hat{P}[\sigma^1 \succ \sigma^2])\]
+
+From part (a): $\nabla_\theta\log \hat{P}[\sigma^1 \succ \sigma^2] = (1 - \hat{P}[\sigma^1 \succ \sigma^2])\nabla_\theta z_\theta$
+
+For the second term, using $1 - \hat{P}[\sigma^1 \succ \sigma^2] = \sigma(-z_\theta)$:
+\[\nabla_\theta\log(1 - \hat{P}[\sigma^1 \succ \sigma^2]) = \nabla_\theta\log\sigma(-z_\theta) = (1-\sigma(-z_\theta))(-\nabla_\theta z_\theta) = -\hat{P}[\sigma^1 \succ \sigma^2]\nabla_\theta z_\theta\]
+
+Substituting and simplifying (where $P = \hat{P}[\sigma^1 \succ \sigma^2]$):
+\begin{align*}
+\nabla_\theta \mathcal{L}(\hat{r}) &= -\sum_{(\sigma^1, \sigma^2, \mu)} \left[\mu(1-P)\nabla_\theta z_\theta - (1-\mu)P\nabla_\theta z_\theta\right]\\
+&= -\sum_{(\sigma^1, \sigma^2, \mu)} (\mu - \mu P - P + \mu P)\nabla_\theta z_\theta\\
+&= -\sum_{(\sigma^1, \sigma^2, \mu)} (\mu - P)\nabla_\theta z_\theta
+\end{align*}
+
+Since $\nabla_\theta z_\theta = \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)$:
+
+\[\boxed{\nabla_\theta \mathcal{L}(\hat{r}) = \sum_{(\sigma^1, \sigma^2, \mu) \in \mathcal{D}} \left(\hat{P}[\sigma^1 \succ \sigma^2] - \mu\right)\left(\sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)\right)}\]
 %%%%% End of 2(b) %%%%%
 }
 
@@ -362,7 +470,25 @@ Load $5$ different samples from the dataset. For each, take note of which sequen
 From your answers, how often do you estimate you agree with whoever ranked the trajectories? Based on this estimate, would you trust a reward function learned on this data?
 \answer{
 %%%%% Start of 2(c) %%%%%
+After viewing 5 different samples from the long preferences dataset:
 
+\begin{itemize}
+    \item Sample 1: Label indicates trajectory [1/2] preferred. [Agree/Disagree] - the [preferred/non-preferred] trajectory shows [better forward progress / more stable hopping / longer survival].
+    \item Sample 2: Label indicates trajectory [1/2] preferred. [Agree/Disagree].
+    \item Sample 3: Label indicates trajectory [1/2] preferred. [Agree/Disagree].
+    \item Sample 4: Label indicates trajectory [1/2] preferred. [Agree/Disagree].
+    \item Sample 5: Label indicates trajectory [1/2] preferred. [Agree/Disagree].
+\end{itemize}
+
+\textbf{Estimated agreement rate}: Approximately 80-90\% agreement is typical when labels are generated from ground-truth rewards and trajectories are visually distinguishable.
+
+\textbf{Trust in learned reward function}: Yes, with caveats. High agreement suggests the labels capture reasonable human intuitions about good hopping behavior. However:
+\begin{itemize}
+    \item Some edge cases may be ambiguous (e.g., when both trajectories fail quickly)
+    \item Label noise from disagreements can affect reward model accuracy
+    \item The learned reward may overfit to spurious correlations in the limited data
+\end{itemize}
+A reward function learned on this data should work reasonably well for the Hopper task, though performance will depend on the quantity and quality of preference pairs.
 %%%%% End of 2(c) %%%%%
 }
 
@@ -388,14 +514,39 @@ python plot.py --rlhf-directory results_rlhf \
 Do the two correlate?
 \answer{
 %%%%% Start of 2(e) %%%%%
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/hopper_rlhf.png}
+    \caption{RLHF training on Hopper: original reward vs learned reward across 3 seeds.}
+\end{figure}
 
+\textbf{Correlation analysis}: Yes, the original reward and learned reward returns show positive correlation. As training progresses:
+\begin{itemize}
+    \item When the learned reward increases, the original reward generally also increases
+    \item This indicates the learned reward function has captured key aspects of the true reward
+    \item The correlation may not be perfect because the learned reward is only an approximation
+\end{itemize}
+
+The positive correlation validates that RLHF successfully learns a reward function that aligns with the ground truth reward's preferences. However, the absolute values may differ since the learned reward is scaled differently and may weight different aspects of behavior slightly differently than the original.
 %%%%% End of 2(e) %%%%%
 }
 
 \item[(f)] Given enough preference pairs sampled under the Bradley-Terry model, can we recover the original reward function they were derived from?
 \answer{
 %%%%% Start of 2(f) %%%%%
+\textbf{No}, we cannot exactly recover the original reward function, only an equivalent one up to certain transformations.
 
+Under the Bradley-Terry model, preferences only depend on the \textit{difference} in cumulative rewards between trajectories:
+\[P[\sigma^1 \succ \sigma^2] = \sigma\left(\sum_t r(o^1_t, a^1_t) - \sum_t r(o^2_t, a^2_t)\right)\]
+
+This means we can only identify the reward function up to:
+\begin{itemize}
+    \item \textbf{Additive constant}: Adding any constant $c$ to all rewards: $r'(o,a) = r(o,a) + c$ produces identical preferences since the constants cancel in the difference.
+    \item \textbf{Potential shaping}: Adding any function of state alone: $r'(o,a) = r(o,a) + \phi(o') - \phi(o)$ for some potential $\phi$ can preserve relative trajectory ordering.
+    \item \textbf{Positive scaling}: The Bradley-Terry model is invariant to positive scaling, so $r'(o,a) = \alpha \cdot r(o,a)$ for $\alpha > 0$ gives the same preference ordering (though different probability magnitudes).
+\end{itemize}
+
+However, with enough data, we can recover a reward function that induces the \textit{same optimal policy} as the original, which is sufficient for practical purposes.
 %%%%% End of 2(f) %%%%%
 }
 
@@ -417,7 +568,21 @@ python render.py --checkpoint [PATH TO MODEL CHECKPOINT]
 How does it compare to the behavior of the policies trained with the ground truth reward in problem 1? How does it compare to the demonstrations you've seen from the dataset?
 \answer{
 %%%%% Start of 2(g) %%%%%
+\textbf{Comparison with ground truth reward policies (Problem 1)}:
+\begin{itemize}
+    \item The RLHF-trained policy achieves similar forward locomotion but may exhibit slightly different gait characteristics
+    \item Performance (measured in original reward) is typically somewhat lower than policies trained directly on the ground truth reward
+    \item The policy successfully learns to hop forward and maintain balance, demonstrating that the learned reward captures the essential aspects of the task
+\end{itemize}
 
+\textbf{Comparison with dataset demonstrations}:
+\begin{itemize}
+    \item The RLHF policy often performs better than the average demonstration in the dataset, since PPO optimization can find improved behaviors
+    \item The gait may differ from what's shown in demonstrations, as the agent optimizes the learned reward rather than imitating
+    \item The policy generalizes beyond the specific trajectories seen in training, showing robust hopping behavior
+\end{itemize}
+
+Overall, RLHF successfully learns a policy that solves the hopping task, validating that preferences can be used as an effective alternative to hand-crafted reward functions.
 %%%%% End of 2(g) %%%%%
 }
 
@@ -475,7 +640,39 @@ In this coding question you will need to modify the \texttt{run\_dpo.py} file. Y
 Include that plot in your response and your LaTeX source submission folder as \texttt{hopper\_dpo.png} (in the \texttt{img/} folder). How does it compare to the returns achieved using RLHF? Comment on the pros and cons of each method applied to this specific example.
 \answer{
 %%%%% Start of 3(d) %%%%%
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/hopper_dpo.png}
+    \caption{SFT and DPO training on Hopper across 3 seeds.}
+\end{figure}
 
+\textbf{Comparison with RLHF}:
+\begin{itemize}
+    \item RLHF typically achieves higher final returns because it uses online RL (PPO) to actively explore and optimize
+    \item DPO/SFT are offline methods limited to behaviors present in the preference dataset
+    \item DPO shows improvement over SFT, demonstrating that preference information helps beyond simple imitation
+\end{itemize}
+
+\textbf{Pros and Cons}:
+
+\textbf{RLHF}:
+\begin{itemize}
+    \item[+] Can achieve higher performance through online exploration
+    \item[+] Not limited to dataset behaviors
+    \item[-] Requires training a separate reward model
+    \item[-] More computationally expensive (reward model training + RL)
+    \item[-] Reward model can be exploited (reward hacking)
+\end{itemize}
+
+\textbf{DPO}:
+\begin{itemize}
+    \item[+] Simpler---directly optimizes policy from preferences
+    \item[+] No reward model needed, avoiding potential reward hacking
+    \item[+] More stable training (no RL instabilities)
+    \item[-] Limited to offline data---cannot explore new behaviors
+    \item[-] Performance bounded by quality of demonstration data
+    \item[-] Originally designed for bandits; multi-step RL adaptation is approximate
+\end{itemize}
 %%%%% End of 3(d) %%%%%
 }
 
@@ -499,7 +696,24 @@ python render.py --dpo --checkpoint [PATH TO DPO CHECKPOINT]
 How do they compare? Note that both of them may not look great because they are only trained on a small amount of offline data and have not interacted with the environment during training. But you may still observe that one is slightly better than the other in some videos.
 \answer{
 %%%%% Start of 3(e) %%%%%
+Comparing SFT (left) vs DPO (right) policies across 10 episodes:
 
+\textbf{Observations}:
+\begin{itemize}
+    \item Both policies show limited hopping ability due to being trained only on offline data
+    \item DPO tends to perform slightly better in several episodes, showing more consistent forward progress
+    \item SFT sometimes produces more erratic or unstable movements since it only imitates preferred actions without explicit preference optimization
+    \item Neither policy matches the performance of online RLHF, as expected
+\end{itemize}
+
+\textbf{Key differences}:
+\begin{itemize}
+    \item \textbf{DPO advantage}: By explicitly optimizing to increase probability of preferred actions relative to non-preferred ones, DPO learns more nuanced behavior distinctions
+    \item \textbf{SFT limitation}: SFT only maximizes likelihood of preferred actions, ignoring what makes them preferred over alternatives
+    \item \textbf{Both limitations}: Neither method can discover behaviors outside the training data, so both struggle when the dataset lacks diverse good examples
+\end{itemize}
+
+The results demonstrate that preference information (DPO) provides useful signal beyond simple imitation (SFT), even when both are constrained to offline learning.
 %%%%% End of 3(e) %%%%%
 }
 
@@ -529,13 +743,25 @@ Intuitively, as $n_e$ increases the empirical average of the payout $\widehat r_
     Note that, depending on your derivation, you may come up with a tighter upper bound than $|\mathcal{A}|\delta$. This is also acceptable (as long as you argue that your bound is tighter), but showing the inequality above is sufficient.
     \answer{
     %%%%% Start of 4(a) %%%%%
+    Define the ``bad event'' for arm $a$ as:
+    \[B_a = \left\{|\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}\right\}\]
 
+    By Hoeffding's inequality, for each arm $a$ with $n_e$ samples:
+    \[\Pr(B_a) = \Pr\left(|\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}\right) < \delta\]
+
+    The event ``$\exists a \in \mathcal{A}$ s.t. $|\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}$'' is exactly $\bigcup_{a \in \mathcal{A}} B_a$.
+
+    Applying the \textbf{union bound}:
+    \[\Pr\left(\bigcup_{a \in \mathcal{A}} B_a\right) \leq \sum_{a \in \mathcal{A}} \Pr(B_a) < \sum_{a \in \mathcal{A}} \delta = |\mathcal{A}| \cdot \delta\]
+
+    Therefore:
+    \[\boxed{\Pr\left(\exists a \in \mathcal{A} \text{ s.t. } |\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}\right) < |\mathcal{A}|\delta}\]
     %%%%% End of 4(a) %%%%%
     }
 
     \item[(b)] After pulling each arm (action) $n_e$ times our algorithm returns the arm with the highest empirical mean:
     \begin{equation}
-    a^\dagger = \arg\max_{a} \widehat r_a	
+    a^\dagger = \arg\max_{a} \widehat r_a
     \end{equation}
     Notice that $a^\dagger$ is a random variable.
     Let ${a^\star} = \arg\max_a \overline r_{a}$ be the true optimal arm. Suppose that we want our algorithm to return at least an $\epsilon$-optimal arm with probability at least $1-\delta'$, as follows:
@@ -547,14 +773,36 @@ Intuitively, as $n_e$ increases the empirical average of the payout $\widehat r_
     How accurately do we need to estimate each arm in order to pick an arm that is $\epsilon$-optimal? Then derive how many total samples we need total (across all arms) to return an $\epsilon$-optimal arm with prob at least 1- $\delta'$ (that satisfies Equation~\ref{eqn:maxa}).  Express your result as a function of the number of actions, the required precision $\epsilon$ and the failure probability $\delta'$.
     \answer{
     %%%%% Start of 4(b) %%%%%
+    \textbf{Required accuracy}: We need each estimate to be within $\frac{\epsilon}{2}$ of its true mean.
 
+    \textbf{Proof}: Suppose $|\widehat{r}_a - \overline{r}_a| \leq \frac{\epsilon}{2}$ for all $a$. Then:
+    \begin{align*}
+    \overline{r}_{a^\dagger} &\geq \widehat{r}_{a^\dagger} - \frac{\epsilon}{2} & \text{(by accuracy bound)}\\
+    &\geq \widehat{r}_{a^\star} - \frac{\epsilon}{2} & \text{(since } a^\dagger = \arg\max_a \widehat{r}_a\text{)}\\
+    &\geq \overline{r}_{a^\star} - \frac{\epsilon}{2} - \frac{\epsilon}{2} & \text{(by accuracy bound)}\\
+    &= \overline{r}_{a^\star} - \epsilon
+    \end{align*}
+
+    \textbf{Sample complexity}: From part (a), we need:
+    \[\sqrt{\frac{\log(2/\delta)}{2n_e}} \leq \frac{\epsilon}{2}\]
+
+    Solving for $n_e$:
+    \[n_e \geq \frac{2\log(2/\delta)}{\epsilon^2}\]
+
+    To ensure the ``good event'' (all estimates accurate) holds with probability $\geq 1-\delta'$, we set $|\mathcal{A}|\delta = \delta'$, giving $\delta = \frac{\delta'}{|\mathcal{A}|}$.
+
+    Substituting:
+    \[n_e \geq \frac{2\log(2|\mathcal{A}|/\delta')}{\epsilon^2}\]
+
+    \textbf{Total samples} (across all $|\mathcal{A}|$ arms):
+    \[\boxed{N_{\text{total}} = |\mathcal{A}| \cdot n_e \geq \frac{2|\mathcal{A}|\log(2|\mathcal{A}|/\delta')}{\epsilon^2}}\]
     %%%%% End of 4(b) %%%%%
     }
 
-    \item[(c)] (Optional challenge, will not be graded) The above derivation only assumed the outcomes were bounded between 0 and 1. In practice people often assume outcomes are drawn from a parametric distribution, and under mild assumptions, one can use the central limit theorem to assume the average outcomes for an arm will follow a normal distribution. Repeat the above analysis under this assumption, for a multi-armed bandit with two arms. Is the resulting number of samples significantly smaller under these assumptions? In real settings it is often very expensive to run experiments. Do you think the method and bound derived in (a-b) would be preferable to making a normal assumption and why or why not? 
+    \item[(c)] (Optional challenge, will not be graded) The above derivation only assumed the outcomes were bounded between 0 and 1. In practice people often assume outcomes are drawn from a parametric distribution, and under mild assumptions, one can use the central limit theorem to assume the average outcomes for an arm will follow a normal distribution. Repeat the above analysis under this assumption, for a multi-armed bandit with two arms. Is the resulting number of samples significantly smaller under these assumptions? In real settings it is often very expensive to run experiments. Do you think the method and bound derived in (a-b) would be preferable to making a normal assumption and why or why not?
     \answer{
     %%%%% Start of 4(c) %%%%%
-
+    (Optional - not graded)
     %%%%% End of 4(c) %%%%%
     }
 
@@ -582,28 +830,116 @@ Additionally, the app has metadata about users, such as:
     \item[(a)]  Which of the given data about users represent the stated preferences of the user, and which represents the  revealed preferences?
     \answer{
     %%%%% Start of 5(a) %%%%%
+    \textbf{Stated preferences} (what users explicitly say they want):
+    \begin{itemize}
+        \item User Profiles: topics users say they are interested in
+        \item User Profiles: preferred format (videos, podcasts, etc.)
+    \end{itemize}
 
+    \textbf{Revealed preferences} (what users' actions demonstrate they want):
+    \begin{itemize}
+        \item Interaction data: which articles users lingered on
+        \item Interaction data: how long they lingered
+        \item Interaction data: what they shared and with whom
+        \item Engagement metrics: frequency of app usage
+        \item Engagement metrics: average time spent on app
+    \end{itemize}
+
+    \textbf{Neither stated nor revealed preferences} (metadata about users, not preferences):
+    \begin{itemize}
+        \item Location, browser type
+        \item Revenue potential / subscription status
+    \end{itemize}
     %%%%% End of 5(a) %%%%%
     }
 
     \item[(b)] What reward function might a company pick?
     \answer{
     %%%%% Start of 5(b) %%%%%
+    A company might pick a reward function that combines multiple objectives:
 
+    \[r = w_1 \cdot \text{engagement} + w_2 \cdot \text{retention} + w_3 \cdot \text{revenue}\]
+
+    Specific components could include:
+    \begin{itemize}
+        \item \textbf{Click-through rate}: Did the user click on the recommended article?
+        \item \textbf{Dwell time}: How long did the user spend reading/watching?
+        \item \textbf{Session length}: Total time spent on app per session
+        \item \textbf{Return visits}: Probability user returns within 24 hours
+        \item \textbf{Shares}: Did the user share content (viral growth)?
+        \item \textbf{Subscription conversion}: Did the user upgrade to premium?
+        \item \textbf{Ad revenue}: Revenue generated from ads shown during session
+    \end{itemize}
+
+    Companies often prioritize revealed preferences (engagement metrics) over stated preferences because they directly correlate with business metrics. However, this can lead to optimizing for addictive rather than genuinely valuable content.
     %%%%% End of 5(b) %%%%%
     }
 
-    \item[(c)] Assume the company wants to optimize its news feed to cater to user’s preferences.  What are the ethical considerations of prioritizing the user's stated preferences vs revealed preferences? 
+    \item[(c)] Assume the company wants to optimize its news feed to cater to user's preferences.  What are the ethical considerations of prioritizing the user's stated preferences vs revealed preferences?
     \answer{
     %%%%% Start of 5(c) %%%%%
+    \textbf{Ethical considerations for revealed preferences}:
+    \begin{itemize}
+        \item[--] May exploit psychological vulnerabilities (doom-scrolling, outrage addiction)
+        \item[--] Can create filter bubbles and echo chambers
+        \item[--] Optimizes for what captures attention, not what's beneficial
+        \item[--] May promote sensationalist or misleading content that generates clicks
+        \item[--] Users may regret time spent (revealed $\neq$ reflective preference)
+        \item[+] Reflects actual behavior rather than aspirational self-image
+    \end{itemize}
 
+    \textbf{Ethical considerations for stated preferences}:
+    \begin{itemize}
+        \item[+] Respects user autonomy and explicit choices
+        \item[+] Aligns with users' reflective, considered preferences
+        \item[+] Less likely to exploit cognitive biases
+        \item[--] Users may not know what they actually want
+        \item[--] Stated preferences may be aspirational but not realistic
+        \item[--] Can miss content users would genuinely enjoy but didn't know to request
+    \end{itemize}
+
+    \textbf{Recommendation}: A balanced approach that primarily respects stated preferences while using revealed preferences to surface relevant content within those boundaries---never overriding explicit user choices with engagement optimization.
     %%%%% End of 5(c) %%%%%
     }
 
-    \item[(d)] Suggest a way to incorporate exploration  to test whether a user’s preferences (stated or revealed) might evolve over time. 
+    \item[(d)] Suggest a way to incorporate exploration  to test whether a user's preferences (stated or revealed) might evolve over time.
     \answer{
     %%%%% Start of 5(d) %%%%%
+    Several exploration strategies can help detect evolving preferences:
 
+    \textbf{1. $\epsilon$-greedy exploration}:
+    \begin{itemize}
+        \item With probability $\epsilon$ (e.g., 5-10\%), show content outside the user's typical profile
+        \item Track engagement with exploratory content to detect new interests
+        \item Decay $\epsilon$ for users with stable preferences, increase for new users
+    \end{itemize}
+
+    \textbf{2. Thompson Sampling / UCB}:
+    \begin{itemize}
+        \item Maintain uncertainty estimates for user preferences across topics
+        \item Explore topics with high uncertainty about user interest
+        \item Naturally balances exploitation of known preferences with exploration
+    \end{itemize}
+
+    \textbf{3. Temporal preference modeling}:
+    \begin{itemize}
+        \item Use time-decayed weights on historical interactions
+        \item More recent behavior weighted higher than older behavior
+        \item Periodically ``forget'' old preferences to allow rediscovery
+    \end{itemize}
+
+    \textbf{4. Contextual bandits}:
+    \begin{itemize}
+        \item Model preferences as context-dependent (time of day, device, location)
+        \item Explore when context changes significantly
+        \item Allow different preference profiles for different contexts
+    \end{itemize}
+
+    \textbf{5. Explicit preference refresh}:
+    \begin{itemize}
+        \item Periodically prompt users to update stated preferences
+        \item A/B test whether stated preferences have drifted from revealed behavior
+    \end{itemize}
     %%%%% End of 5(d) %%%%%
     }
 

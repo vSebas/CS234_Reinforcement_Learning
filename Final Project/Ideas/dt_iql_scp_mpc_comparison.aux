@@ -1,0 +1,41 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Problem Setting and Notation}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Sequential Convex Programming (SCP) as the Refinement Backbone}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}What SCP does}{1}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Why warm-start matters for SCP}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Approach A: Decision Transformer Warm-Start + SCP Refinement}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}High-level pipeline}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Decision Transformer as sequence modeling}{2}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Training objective (supervised)}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Warm-starting SCP with DT}{3}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Key strengths of DT+SCP}{3}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Failure modes / risks}{3}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Approach B: IQL-LSTM + MPC (Receding Horizon)}{4}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}High-level pipeline}{4}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}IQL in one page: what it learns}{4}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Why an LSTM policy?}{4}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}MPC execution with IQL warm-start}{4}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Key strengths of IQL-LSTM+MPC}{5}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Failure modes / risks}{5}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Approach C: IQL-LSTM Rollout Warm-Start + SCP Refinement}{5}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}How it works}{5}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Why it is often less natural than DT+SCP}{5}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(1) Object mismatch.}{5}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(2) Compounding rollout error.}{6}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(3) Conditioning and multimodality.}{6}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{(4) Practical data generation.}{6}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}When IQL-LSTM+SCP might be attractive}{6}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Comparison: DT+SCP vs IQL-LSTM+MPC vs IQL-LSTM+SCP}{6}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}What each approach is ``best at''}{6}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Is IQL-LSTM ``more natural'' with MPC than SCP?}{6}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}If your goal is trajectory generation with feasibility guarantees, is DT+SCP better than IQL-LSTM+SCP?}{7}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Recommended Path (for a strong project)}{7}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why this recommendation is pragmatic.}{7}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Suggested Experiments and Deliverables}{7}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Baselines}{7}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Metrics}{8}{subsection.8.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}A clean story to tell}{8}{subsection.8.3}\protected@file@percent }
+\gdef \@abspage@last{8}

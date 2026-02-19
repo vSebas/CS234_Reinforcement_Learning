@@ -50,7 +50,13 @@ class RewardModel(nn.Module):
         super().__init__()
         #######################################################
         #########   YOUR CODE HERE - 2-10 lines.   ############
-
+        self.net = nn.Sequential(
+            nn.Linear(obs_dim + action_dim, hidden_dim),
+            nn.LeakyReLU(),
+            nn.Linear(hidden_dim, 1),
+            nn.Sigmoid()
+        )
+        self.optimizer = optim.AdamW(self.parameters())
         #######################################################
         #########          END YOUR CODE.          ############
         self.r_min = r_min
@@ -89,7 +95,9 @@ class RewardModel(nn.Module):
         rewards = torch.zeros(obs.shape[0])
         #######################################################
         #########   YOUR CODE HERE - 2-3 lines.   ############
-
+        x = torch.cat([obs, action], dim=-1)
+        rewards = self.net(x).squeeze(-1)
+        rewards = self.r_min + rewards * (self.r_max - self.r_min)
         #######################################################
         #########          END YOUR CODE.          ############
 
@@ -121,7 +129,11 @@ class RewardModel(nn.Module):
         """
         #######################################################
         #########   YOUR CODE HERE - 1-4 lines.   ############
-
+        obs_tensor = torch.from_numpy(obs).float().unsqueeze(0)
+        action_tensor = torch.from_numpy(action).float().unsqueeze(0)
+        with torch.no_grad():
+            reward = self.forward(obs_tensor, action_tensor)
+        return reward.item()
         #######################################################
         #########          END YOUR CODE.          ############
 
@@ -147,7 +159,20 @@ class RewardModel(nn.Module):
         loss = torch.zeros(1)
         #######################################################
         #########   YOUR CODE HERE - 5-10 lines.   ############
+        # Compute cumulative rewards for each trajectory
+        rewards1 = self.forward(obs1, act1)  # Shape: (batch_size, T)
+        rewards2 = self.forward(obs2, act2)  # Shape: (batch_size, T)
 
+        R1 = rewards1.sum(dim=-1)  # Shape: (batch_size,)
+        R2 = rewards2.sum(dim=-1)  # Shape: (batch_size,)
+
+        # Stack to get logits for cross-entropy: [R1, R2] per sample
+        logits = torch.stack([R1, R2], dim=-1)  # Shape: (batch_size, 2)
+
+        # Create soft targets: label=0 means first preferred, label=1 means second preferred
+        targets = torch.stack([1 - label, label], dim=-1)  # Shape: (batch_size, 2)
+
+        loss = F.cross_entropy(logits, targets)
         #######################################################
         #########          END YOUR CODE.          ############
 

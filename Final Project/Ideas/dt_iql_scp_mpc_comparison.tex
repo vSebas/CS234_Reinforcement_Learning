@@ -1,0 +1,352 @@
+
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{microtype}
+
+\title{RL Warm-Start for Trajectory Optimization and Control:\\Decision Transformer + SCP vs.\ IQL-LSTM + MPC/SCP}
+\author{}
+\date{\today}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cX}{\mathcal{X}}
+\newcommand{\cD}{\mathcal{D}}
+
+\begin{document}
+\maketitle
+
+\section{Problem Setting and Notation}
+
+We consider constrained trajectory generation for a dynamical system (e.g., a car).
+Let $x_t \in \cX \subseteq \R^{n}$ be the state and $u_t \in \cU \subseteq \R^{m}$ be the control at time $t$.
+Dynamics (discrete time) are
+\begin{equation}
+x_{t+1} = f(x_t, u_t), \quad t=0,\dots,T-1.
+\end{equation}
+Typical constraints include bounds, obstacle avoidance, road/lane boundaries, and actuator limits:
+\begin{equation}
+g_t(x_t,u_t) \le 0, \qquad h_t(x_t,u_t)=0.
+\end{equation}
+A nominal finite-horizon optimal control problem is
+\begin{equation}
+\min_{\{x_t,u_t\}_{t=0}^{T}} \ \sum_{t=0}^{T-1} \ell(x_t,u_t) + \ell_T(x_T)
+\quad \text{s.t.}\quad x_{t+1}=f(x_t,u_t),\ g_t \le 0,\ h_t=0.
+\end{equation}
+The goal of this document is to describe three pipelines:
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{Decision Transformer (DT) warm-start $\rightarrow$ Sequential Convex Programming (SCP) refinement.}
+\item \textbf{Implicit Q-Learning (IQL) with an LSTM policy $\rightarrow$ MPC (receding-horizon) execution.}
+\item \textbf{IQL-LSTM rollout warm-start $\rightarrow$ SCP refinement} (and why it is often less natural than DT+SCP).
+\end{enumerate}
+We then compare these approaches and recommend a path to implement.
+
+\section{Sequential Convex Programming (SCP) as the Refinement Backbone}
+
+\subsection{What SCP does}
+SCP is a \emph{trajectory optimization} method for nonconvex optimal control. It iteratively solves a sequence of convex approximations obtained by linearizing (or otherwise convexifying) dynamics and constraints around a reference trajectory.
+
+Let a current reference trajectory be $\{\bar{x}_t,\bar{u}_t\}$. Linearize dynamics:
+\begin{equation}
+x_{t+1} \approx \bar{x}_{t+1} + A_t (x_t-\bar{x}_t) + B_t (u_t-\bar{u}_t),
+\quad A_t=\frac{\partial f}{\partial x}\Big|_{(\bar{x}_t,\bar{u}_t)},\ 
+B_t=\frac{\partial f}{\partial u}\Big|_{(\bar{x}_t,\bar{u}_t)}.
+\end{equation}
+Similarly convexify constraints (e.g., linearization, convex inner approximation) and use a trust region:
+\begin{equation}
+\|x_t-\bar{x}_t\| \le \Delta_x,\quad \|u_t-\bar{u}_t\| \le \Delta_u.
+\end{equation}
+Solve the resulting convex subproblem (QP/SOCP) to get an update, then repeat.
+
+\subsection{Why warm-start matters for SCP}
+SCP converges fastest (and most reliably) when the initial trajectory is:
+\begin{itemize}[leftmargin=2em]
+\item \textbf{close to feasible} (small constraint violations),
+\item \textbf{in the right local basin} (linearizations are valid),
+\item \textbf{geometrically consistent} over the horizon (obstacle clearance, curvature, timing).
+\end{itemize}
+A poor initialization can lead to many iterations, tiny trust regions, or divergence. This is exactly where learned warm-starts help.
+
+\section{Approach A: Decision Transformer Warm-Start + SCP Refinement}
+
+\subsection{High-level pipeline}
+\begin{enumerate}[leftmargin=2em]
+\item Generate an offline dataset of trajectories $\cD$ (from an optimizer, expert, simulator, or a mix).
+\item Train a sequence model (Decision Transformer or ART-style variant) to generate a \emph{full-horizon} control/state trajectory conditioned on context.
+\item At test time, use the model output as $(x^{(0)}_{0:T}, u^{(0)}_{0:T-1})$ to warm-start SCP.
+\item Run SCP for a small number of iterations to obtain a feasible, locally optimal trajectory.
+\end{enumerate}
+
+\subsection{Decision Transformer as sequence modeling}
+A trajectory becomes a sequence of tokens. A common ordering is
+\begin{equation}
+(R_t, x_t, u_t)_{t=0}^{T-1}, \quad \text{where } R_t = \sum_{k=t}^{T-1} \gamma^{k-t} r_k \ \text{(return-to-go)}.
+\end{equation}
+DT models the conditional distribution of actions given past tokens and a desired return:
+\begin{equation}
+p_\theta(u_t \mid x_{\le t}, u_{<t}, R_{\le t}, \text{context}).
+\end{equation}
+In constrained trajectory optimization, a key practical improvement (used in ART-like designs) is to also condition on a \emph{constraint-to-go} signal, e.g.,
+\begin{equation}
+C_t = \sum_{k=t}^{T-1} c(x_k,u_k),
+\end{equation}
+where $c(\cdot)$ penalizes predicted violations. Then the model can be steered toward trajectories that are easier to ``repair'' by SCP.
+
+\subsection{Training objective (supervised)}
+DT is trained as supervised learning on offline data:
+\begin{equation}
+\min_\theta\ \E_{(R,x,u)\sim \cD}\Big[\sum_{t=0}^{T-1} \|u_t - \hat{u}_t\|^2\Big],
+\quad \hat{u}_t \sim p_\theta(\cdot \mid \text{past tokens}).
+\end{equation}
+No Bellman backups; no policy gradient. The \emph{RL} aspect is that the dataset arises from an MDP and the model is conditioned on returns/constraint budgets to produce high-performing behavior.
+
+\subsection{Warm-starting SCP with DT}
+At inference, DT generates either:
+\begin{itemize}[leftmargin=2em]
+\item a control sequence $u^{(0)}_{0:T-1}$, and then we forward simulate $x^{(0)}$ using the dynamics, or
+\item both $(x^{(0)}_{0:T},u^{(0)}_{0:T-1})$ directly (often helpful because it provides a coherent state path for linearization).
+\end{itemize}
+Then SCP runs:
+\[
+(\bar{x},\bar{u}) \leftarrow (x^{(0)},u^{(0)}) \quad \rightarrow\quad \text{convexify}\quad \rightarrow\quad \text{solve}\quad \rightarrow\quad \text{update}.
+\]
+A strong warm start typically reduces:
+\begin{itemize}[leftmargin=2em]
+\item the number of SCP iterations,
+\item the amount of trust-region shrinking,
+\item the frequency of infeasible subproblems.
+\end{itemize}
+
+\subsection{Key strengths of DT+SCP}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Naturally produces full-horizon structure.} DT learns a distribution over entire trajectories, which is exactly what SCP linearizes around.
+\item \textbf{Stable training.} Pure supervised learning on offline trajectories.
+\item \textbf{Conditioning knobs.} Return-to-go and constraint-to-go provide explicit tradeoff control between performance and feasibility.
+\item \textbf{Multiple modes.} The model can represent distinct maneuver modes (e.g., different ways around an obstacle) better than a single local policy.
+\end{itemize}
+
+\subsection{Failure modes / risks}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Out-of-distribution (OOD) contexts.} DT can produce implausible trajectories if asked to extrapolate.
+\item \textbf{Dataset quality.} If the offline trajectories are low quality or inconsistent, the warm starts degrade.
+\item \textbf{No hard guarantees.} Feasibility is still guaranteed by SCP, not by DT.
+\end{itemize}
+
+\section{Approach B: IQL-LSTM + MPC (Receding Horizon)}
+
+\subsection{High-level pipeline}
+\begin{enumerate}[leftmargin=2em]
+\item Collect an offline dataset $\cD$ of transitions or trajectories: $(x_t,u_t,r_t,x_{t+1})$.
+\item Train an IQL agent: a value model and a policy (here, the policy is an LSTM).
+\item Use the learned policy online either:
+\begin{itemize}[leftmargin=2em]
+\item as the primary controller, or
+\item as a \textbf{warm-start generator} for MPC by rolling it out for $N$ steps to propose $u_{0:N-1}^{(0)}$.
+\end{itemize}
+\end{enumerate}
+
+\subsection{IQL in one page: what it learns}
+IQL is an \emph{offline RL} method that avoids explicit maximization over actions (which can be unstable offline). It learns:
+\begin{itemize}[leftmargin=2em]
+\item a Q-function $Q_\phi(x,u)$,
+\item a value function $V_\psi(x)$ fit by expectile regression,
+\item a policy $\pi_\theta(u\mid x)$ trained by advantage-weighted regression.
+\end{itemize}
+
+A typical IQL structure:
+\begin{equation}
+V_\psi(x) \approx \arg\min_V\ \E_{(x,u)\sim\cD}\Big[\rho_\tau\big(Q_\phi(x,u)-V\big)\Big],
+\quad \rho_\tau(\delta)=|\tau-\mathbf{1}\{\delta<0\}|\delta^2,
+\end{equation}
+where $\tau\in(0,1)$ sets the expectile.
+Then $Q_\phi$ is trained with a TD-style target using $V_\psi$:
+\begin{equation}
+\min_\phi\ \E_{(x,u,r,x')\sim\cD}\Big[\big(Q_\phi(x,u) - (r + \gamma V_\psi(x'))\big)^2\Big].
+\end{equation}
+Finally, the policy is trained to upweight actions with high estimated advantage:
+\begin{equation}
+A(x,u)=Q_\phi(x,u)-V_\psi(x),\qquad
+\max_\theta\ \E_{(x,u)\sim\cD}\Big[\exp(\beta A(x,u)) \log \pi_\theta(u\mid x)\Big].
+\end{equation}
+
+\subsection{Why an LSTM policy?}
+An LSTM policy $\pi_\theta(u_t\mid h_t)$ with hidden state $h_t$ can handle partial observability and temporal dependencies:
+\begin{equation}
+h_t = \text{LSTM}(h_{t-1}, o_t), \qquad u_t \sim \pi_\theta(\cdot\mid h_t),
+\end{equation}
+where $o_t$ are observations (possibly $o_t=x_t$ if fully observed).
+
+\subsection{MPC execution with IQL warm-start}
+MPC solves a horizon-$N$ optimization at each real-time step $t$:
+\begin{equation}
+\min_{u_{t:t+N-1}} \sum_{k=0}^{N-1}\ell(x_{t+k},u_{t+k}) + \ell_f(x_{t+N})
+\quad \text{s.t.}\quad x_{t+k+1}=f(x_{t+k},u_{t+k}),\ \text{constraints}.
+\end{equation}
+Warm-start options:
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Shifted warm-start:} use previous MPC solution shifted by one step.
+\item \textbf{IQL rollout warm-start:} roll out the LSTM policy from the current state for $N$ steps to obtain $u^{(0)}_{t:t+N-1}$, then initialize the MPC solver with it.
+\end{itemize}
+This is \emph{very natural} because IQL directly provides a closed-loop policy that can propose plausible near-term controls quickly.
+
+\subsection{Key strengths of IQL-LSTM+MPC}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Naturally aligned with feedback control.} IQL learns a policy; MPC needs a good initial control sequence \emph{at each time step}.
+\item \textbf{Robustness via receding horizon.} MPC re-optimizes as the system evolves, correcting modeling errors.
+\item \textbf{Offline improvement potential.} Unlike pure imitation, IQL can improve over the dataset under certain conditions (in practice: depends on coverage).
+\item \textbf{Ensembles help.} Multiple LSTMs can provide diverse warm starts and uncertainty estimates.
+\end{itemize}
+
+\subsection{Failure modes / risks}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Offline RL brittleness.} Performance depends strongly on dataset coverage; OOD states can lead to poor proposals.
+\item \textbf{Constraint handling is indirect.} IQL policy is not guaranteed to respect constraints; MPC must enforce them.
+\item \textbf{Horizon coherence is not the first-class object.} Rolling out a policy can accumulate errors and produce trajectories that drift or oscillate over long horizons.
+\end{itemize}
+
+\section{Approach C: IQL-LSTM Rollout Warm-Start + SCP Refinement}
+
+\subsection{How it works}
+This approach is valid:
+\begin{enumerate}[leftmargin=2em]
+\item From current context (initial state, goal), roll out the IQL-LSTM policy for $T$ steps to produce $u^{(0)}_{0:T-1}$.
+\item Forward simulate to produce $x^{(0)}_{0:T}$.
+\item Initialize SCP at $(x^{(0)},u^{(0)})$ and refine.
+\end{enumerate}
+
+\subsection{Why it is often less natural than DT+SCP}
+Even though it works, it is often a weaker match to SCP for \emph{trajectory generation} because:
+
+\paragraph{(1) Object mismatch.}
+SCP is a batch trajectory optimizer; it benefits from an initialization that captures full-horizon structure.
+An IQL policy is trained to choose actions locally to maximize value, not explicitly to produce globally consistent trajectories.
+
+\paragraph{(2) Compounding rollout error.}
+Small policy errors can compound across $T$ steps. The resulting trajectory can be geometrically inconsistent (e.g., late obstacle avoidance), making SCP linearizations harder.
+
+\paragraph{(3) Conditioning and multimodality.}
+DT/ART-style models can condition directly on desired return and constraint budgets and can represent multiple maneuver modes.
+An IQL policy tends to represent a single mode unless explicitly diversified (ensembles help, but it is not the same as modeling a trajectory distribution).
+
+\paragraph{(4) Practical data generation.}
+If you already have an optimizer producing trajectories (common in planning), it is often simpler to train a sequence model to imitate those solutions than to train an offline RL agent with stable value learning.
+
+\subsection{When IQL-LSTM+SCP might be attractive}
+\begin{itemize}[leftmargin=2em]
+\item Dataset consists of \emph{suboptimal} behavior logs, and you want improvement beyond imitation.
+\item You want a \emph{single} learned controller that can also act without SCP if needed.
+\item You care about disturbance rejection in the learned proposal itself (policy produces feedback behavior).
+\end{itemize}
+
+\section{Comparison: DT+SCP vs IQL-LSTM+MPC vs IQL-LSTM+SCP}
+
+\subsection{What each approach is ``best at''}
+\begin{center}
+\begin{tabular}{@{}p{3.3cm}p{4.1cm}p{4.1cm}p{4.1cm}@{}}
+\toprule
+ & \textbf{DT + SCP} & \textbf{IQL-LSTM + MPC} & \textbf{IQL-LSTM + SCP} \\
+\midrule
+Primary role &
+Trajectory prior (full-horizon) + feasibility repair &
+Feedback control with constraint enforcement (online) &
+Policy rollout as trajectory prior + feasibility repair \\
+\addlinespace
+Natural fit &
+Batch planning / trajectory optimization &
+Online receding-horizon control &
+Works, but object mismatch for long-horizon planning \\
+\addlinespace
+Training stability &
+High (supervised) &
+Medium (offline RL can be brittle) &
+Medium (same as IQL) \\
+\addlinespace
+Handles constraints &
+Via SCP guarantees &
+Via MPC guarantees &
+Via SCP guarantees \\
+\addlinespace
+Multimodality &
+Strong (sequence distribution) &
+Moderate (ensembles) &
+Moderate (ensembles) \\
+\addlinespace
+Best evaluation metrics &
+SCP iterations, feasibility rate, final cost &
+MPC solve time, tracking error, violations &
+SCP iterations + rollout coherence \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Is IQL-LSTM ``more natural'' with MPC than SCP?}
+\textbf{Yes, usually.} IQL learns a \emph{policy}, and MPC needs a \emph{near-term control sequence} at every time step. Rolling out the policy for $N$ steps to seed MPC is a direct and stable use of what the policy provides. In contrast, using a policy rollout to seed a \emph{full-horizon batch optimizer} asks the policy to implicitly solve long-horizon geometry; it can work, but it is not what the policy is optimized for.
+
+\subsection{If your goal is trajectory generation with feasibility guarantees, is DT+SCP better than IQL-LSTM+SCP?}
+\textbf{Typically yes.} For warm-starting SCP, the most important property is a globally coherent initialization that sits near a good local basin and is easy to convexify. DT/ART-style sequence models are trained to generate coherent sequences and can be explicitly conditioned on return and constraint budgets. An IQL policy rollout can be coherent, but it is optimized indirectly through value learning and is more sensitive to dataset coverage and rollout compounding.
+
+\section{Recommended Path (for a strong project)}
+
+If the project goal is \textbf{trajectory generation under hard constraints} with a learned warm-start:
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{Start with DT (or ART-style DT with constraint-to-go) + SCP.}
+\begin{itemize}[leftmargin=2em]
+\item Generate a dataset by solving many trajectory optimization problems offline.
+\item Train the sequence model to predict $(x_{0:T},u_{0:T-1})$ (or just $u$ plus rollout).
+\item Evaluate: SCP iterations, runtime, feasibility success rate, final objective value.
+\end{itemize}
+
+\item \textbf{Add MPC as an execution layer if time permits.}
+\begin{itemize}[leftmargin=2em]
+\item Use the SCP-refined plan as a reference trajectory.
+\item Run tracking MPC (or NMPC) online to handle disturbances/mismatch.
+\end{itemize}
+
+\item \textbf{Use IQL-LSTM as a complementary baseline/ablation.}
+\begin{itemize}[leftmargin=2em]
+\item Train IQL-LSTM and compare its rollout warm-start for SCP against DT warm-start.
+\item Also compare IQL rollout warm-start for MPC against shifted warm-start.
+\end{itemize}
+\end{enumerate}
+
+\paragraph{Why this recommendation is pragmatic.}
+DT+SCP cleanly separates responsibilities:
+\begin{itemize}[leftmargin=2em]
+\item Learning captures the \emph{manifold of good trajectories} (fast generation, multimodal structure).
+\item SCP enforces \emph{hard feasibility} and improves cost.
+\item MPC (optional) provides \emph{closed-loop robustness} for real-time deployment.
+\end{itemize}
+This separation tends to minimize ``RL tuning pain'' while maximizing measurable gains (iteration count, solve time, feasibility).
+
+\section{Suggested Experiments and Deliverables}
+
+\subsection{Baselines}
+Include at least:
+\begin{itemize}[leftmargin=2em]
+\item Straight-line or zero-control initialization $\rightarrow$ SCP
+\item Shifted previous-solution initialization (if applicable) $\rightarrow$ SCP/MPC
+\item DT warm-start $\rightarrow$ SCP
+\item IQL-LSTM rollout warm-start $\rightarrow$ SCP
+\item IQL-LSTM rollout warm-start $\rightarrow$ MPC
+\end{itemize}
+
+\subsection{Metrics}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Feasibility rate}: fraction of problems where final solution satisfies constraints.
+\item \textbf{Optimization effort}: SCP iterations, solver time; MPC iterations/time per step.
+\item \textbf{Performance}: final cost, tracking error, smoothness (comfort), clearance margins.
+\item \textbf{Robustness}: disturbances, friction mismatch, perception noise, goal perturbations.
+\end{itemize}
+
+\subsection{A clean story to tell}
+\begin{quote}
+A learned sequence model provides a globally coherent trajectory prior; SCP repairs feasibility and local optimality; MPC (optional) tracks robustly online. Offline RL policies are strong baselines for generating short-horizon warm-starts for MPC, but are typically less effective than DT/ART-style models for full-horizon SCP warm-starting.
+\end{quote}
+
+\end{document}
