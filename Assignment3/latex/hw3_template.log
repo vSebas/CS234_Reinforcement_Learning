@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.2.19)  20 FEB 2026 16:32
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.2.19)  20 FEB 2026 22:03
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -819,11 +819,6 @@ Overfull \hbox (2.34251pt too wide) in paragraph at lines 440--440
  []
 
 
-Underfull \hbox (badness 2418) in paragraph at lines 475--475
-[]\OT1/cmr/m/n/10 Sample 1: La-bel in-di-cates tra-jec-tory [1/2] pre-ferred. [Agree/Dis-agree] - the
- []
-
-
 
 [12
 
@@ -831,7 +826,7 @@ Underfull \hbox (badness 2418) in paragraph at lines 475--475
 <img/hopper_rlhf.png, id=176, 404.712pt x 328.8285pt>
 File: img/hopper_rlhf.png Graphic file (type png)
 <use img/hopper_rlhf.png>
-Package pdftex.def Info: img/hopper_rlhf.png  used on input line 514.
+Package pdftex.def Info: img/hopper_rlhf.png  used on input line 493.
 (pdftex.def)             Requested size: 330.76686pt x 268.76305pt.
 
 
@@ -848,7 +843,7 @@ Package pdftex.def Info: img/hopper_rlhf.png  used on input line 514.
 [16
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 593--597
+Underfull \hbox (badness 10000) in paragraph at lines 552--556
 
  []
 
@@ -860,30 +855,32 @@ Underfull \hbox (badness 10000) in paragraph at lines 593--597
 <img/hopper_dpo.png, id=216, 398.9304pt x 328.8285pt>
 File: img/hopper_dpo.png Graphic file (type png)
 <use img/hopper_dpo.png>
-Package pdftex.def Info: img/hopper_dpo.png  used on input line 659.
+Package pdftex.def Info: img/hopper_dpo.png  used on input line 601.
 (pdftex.def)             Requested size: 330.76686pt x 272.65663pt.
 
 
 [18]
 
 [19 <./img/hopper_dpo.png>]
-
-[20]
-Overfull \hbox (7.74251pt too wide) in paragraph at lines 666--666
+Overfull \hbox (7.74251pt too wide) in paragraph at lines 608--608
 []\OT1/pcr/m/n/9 # Note: --checkpoint argument should be the path to the dpo.pt the script will[] 
  []
 
 
 
+[20
+
+]
+
 [21
 
 ]
 
-[22
+[22]
+
+[23
 
 ]
-
-[23]
 
 [24
 
@@ -905,10 +902,6 @@ Overfull \hbox (7.74251pt too wide) in paragraph at lines 666--666
 
 ]
 
-[29
-
-]
-
 Package caption Warning: Unused \captionsetup[table] on input line 19.
 See the caption package documentation for explanation.
 
@@ -923,18 +916,18 @@ Package rerunfilecheck Info: File `hw3_template.out' has not changed.
 (rerunfilecheck)             Checksum: 7F58C2FB4D3C9E02DA7990108B404DFB;2409.
  ) 
 Here is how much of TeX's memory you used:
- 30921 strings out of 475171
- 609937 string characters out of 5767095
+ 30919 strings out of 475171
+ 609914 string characters out of 5767095
  1208213 words of memory out of 5000000
- 53328 multiletter control sequences out of 15000+600000
+ 53327 multiletter control sequences out of 15000+600000
  574443 words of font info for 93 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 98i,12n,105p,1260b,1096s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 98i,12n,105p,1260b,1095s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on hw3_template.pdf (29 pages, 482622 bytes).
+Output written on hw3_template.pdf (28 pages, 478505 bytes).
 PDF statistics:
- 380 PDF objects out of 1000 (max. 8388607)
- 280 compressed objects within 3 object streams
- 59 named destinations out of 1000 (max. 500000)
+ 375 PDF objects out of 1000 (max. 8388607)
+ 276 compressed objects within 3 object streams
+ 58 named destinations out of 1000 (max. 500000)
  252 words of extra memory for PDF output out of 10000 (max. 10000000)
 

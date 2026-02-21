@@ -452,25 +452,11 @@ Load $5$ different samples from the dataset. For each, take note of which sequen
 From your answers, how often do you estimate you agree with whoever ranked the trajectories? Based on this estimate, would you trust a reward function learned on this data?
 \answer{
 %%%%% Start of 2(c) %%%%%
-After viewing 5 different samples from the long preferences dataset:
 
-\begin{itemize}
-    \item Sample 1: Label indicates trajectory [1/2] preferred. [Agree/Disagree] - the [preferred/non-preferred] trajectory shows [better forward progress / more stable hopping / longer survival].
-    \item Sample 2: Label indicates trajectory [1/2] preferred. [Agree/Disagree].
-    \item Sample 3: Label indicates trajectory [1/2] preferred. [Agree/Disagree].
-    \item Sample 4: Label indicates trajectory [1/2] preferred. [Agree/Disagree].
-    \item Sample 5: Label indicates trajectory [1/2] preferred. [Agree/Disagree].
-\end{itemize}
+After viewing 5 different samples from the long preferences dataset, I can say that I agree with 4 out of the 5 labels. For sample with $\text{IDX}=1$, I preferred the one labeled as "Not Preferred". 
 
-\textbf{Estimated agreement rate}: Approximately 80-90\% agreement is typical when labels are generated from ground-truth rewards and trajectories are visually distinguishable.
+I guess my estimated agreement rate is approximately 80\%. I would trust in the reward function on this data, but with caveats. This high agreement suggests that the labels capture reasonable human intuitions about good hopping behavior, tough some edge cases may still seem ambiguous.
 
-\textbf{Trust in learned reward function}: Yes, with caveats. High agreement suggests the labels capture reasonable human intuitions about good hopping behavior. However:
-\begin{itemize}
-    \item Some edge cases may be ambiguous (e.g., when both trajectories fail quickly)
-    \item Label noise from disagreements can affect reward model accuracy
-    \item The learned reward may overfit to spurious correlations in the limited data
-\end{itemize}
-A reward function learned on this data should work reasonably well for the Hopper task, though performance will depend on the quantity and quality of preference pairs.
 %%%%% End of 2(c) %%%%%
 }
 
@@ -502,33 +488,15 @@ Do the two correlate?
     \caption{RLHF training on Hopper: original reward vs learned reward across 3 seeds.}
 \end{figure}
 
-\textbf{Correlation analysis}: Yes, the original reward and learned reward returns show positive correlation. As training progresses:
-\begin{itemize}
-    \item When the learned reward increases, the original reward generally also increases
-    \item This indicates the learned reward function has captured key aspects of the true reward
-    \item The correlation may not be perfect because the learned reward is only an approximation
-\end{itemize}
-
-The positive correlation validates that RLHF successfully learns a reward function that aligns with the ground truth reward's preferences. However, the absolute values may differ since the learned reward is scaled differently and may weight different aspects of behavior slightly differently than the original.
+Yes, the two strongly correlate. Looking at the training curves, when the learned reward goes up, the original reward also goes up. For example, in seed 1, the agent reaches a final original return of 1495.20 and learned return of 436.41, the absolute values differ because the learned reward is scaled to $[0,1]$, but both increase together throughout training. This means our learned reward function successfully captures what ''good hopping'' looks like: optimizing for the learned reward also improves performance on the true reward, even though the reward model never saw the original reward function directly.
 %%%%% End of 2(e) %%%%%
 }
 
 \item[(f)] Given enough preference pairs sampled under the Bradley-Terry model, can we recover the original reward function they were derived from?
 \answer{
 %%%%% Start of 2(f) %%%%%
-\textbf{No}, we cannot exactly recover the original reward function, only an equivalent one up to certain transformations.
 
-Under the Bradley-Terry model, preferences only depend on the \textit{difference} in cumulative rewards between trajectories:
-\[P[\sigma^1 \succ \sigma^2] = \sigma\left(\sum_t r(o^1_t, a^1_t) - \sum_t r(o^2_t, a^2_t)\right)\]
-
-This means we can only identify the reward function up to:
-\begin{itemize}
-    \item \textbf{Additive constant}: Adding any constant $c$ to all rewards: $r'(o,a) = r(o,a) + c$ produces identical preferences since the constants cancel in the difference.
-    \item \textbf{Potential shaping}: Adding any function of state alone: $r'(o,a) = r(o,a) + \phi(o') - \phi(o)$ for some potential $\phi$ can preserve relative trajectory ordering.
-    \item \textbf{Positive scaling}: The Bradley-Terry model is invariant to positive scaling, so $r'(o,a) = \alpha \cdot r(o,a)$ for $\alpha > 0$ gives the same preference ordering (though different probability magnitudes).
-\end{itemize}
-
-However, with enough data, we can recover a reward function that induces the \textit{same optimal policy} as the original, which is sufficient for practical purposes.
+No. The Bradley-Terry model only compares differences in cumulative rewards between trajectories, so we cannot recover the exact original reward. For example, adding a constant to all rewards ($r' = r + c$) or scaling them ($r' = 2r$) would produce the same preferences. However, we can recover a reward function that leads to the same optimal policy, which is what matters in practice.
 %%%%% End of 2(f) %%%%%
 }
 
@@ -550,19 +518,10 @@ python render.py --checkpoint [PATH TO MODEL CHECKPOINT]
 How does it compare to the behavior of the policies trained with the ground truth reward in problem 1? How does it compare to the demonstrations you've seen from the dataset?
 \answer{
 %%%%% Start of 2(g) %%%%%
-\textbf{Comparison with ground truth reward policies (Problem 1)}:
-\begin{itemize}
-    \item The RLHF-trained policy achieves similar forward locomotion but may exhibit slightly different gait characteristics
-    \item Performance (measured in original reward) is typically somewhat lower than policies trained directly on the ground truth reward
-    \item The policy successfully learns to hop forward and maintain balance, demonstrating that the learned reward captures the essential aspects of the task
-\end{itemize}
 
-\textbf{Comparison with dataset demonstrations}:
-\begin{itemize}
-    \item The RLHF policy often performs better than the average demonstration in the dataset, since PPO optimization can find improved behaviors
-    \item The gait may differ from what's shown in demonstrations, as the agent optimizes the learned reward rather than imitating
-    \item The policy generalizes beyond the specific trajectories seen in training, showing robust hopping behavior
-\end{itemize}
+The behavior of the RLHF-trained agent demonstrates smoother and more stable hopping, better than results from problem 1 (both types). In particular, \textit{Hopper-v4-rlhf-seed=1} maintains a much better balance, though at the cost of reduced forward velocity.
+
+Compared againts the dataset demonstrations, I can say that they seem like the preferred sequence, though these new results do not freeze, and are more complete.
 
 Overall, RLHF successfully learns a policy that solves the hopping task, validating that preferences can be used as an effective alternative to hand-crafted reward functions.
 %%%%% End of 2(g) %%%%%
@@ -628,32 +587,15 @@ Include that plot in your response and your LaTeX source submission folder as \t
     \caption{SFT and DPO training on Hopper across 3 seeds.}
 \end{figure}
 
-\textbf{Comparison with RLHF}:
-\begin{itemize}
-    \item RLHF typically achieves higher final returns because it uses online RL (PPO) to actively explore and optimize
-    \item DPO/SFT are offline methods limited to behaviors present in the preference dataset
-    \item DPO shows improvement over SFT, demonstrating that preference information helps beyond simple imitation
-\end{itemize}
+\textbf{Results}: DPO significantly outperforms SFT. SFT achieves final returns of $\sim$440--480, while DPO achieves $\sim$930--960 (roughly 2x better). For comparison, RLHF achieved $\sim$930--1495.
 
-\textbf{Pros and Cons}:
+\textbf{Comparison with RLHF}: DPO reaches similar performance to RLHF on some seeds, but RLHF has higher potential (seed 1 reached 1495). This is because RLHF uses online RL to actively explore, while DPO is limited to offline data.
 
-\textbf{RLHF}:
+\textbf{Pros and cons}:
 \begin{itemize}
-    \item[+] Can achieve higher performance through online exploration
-    \item[+] Not limited to dataset behaviors
-    \item[-] Requires training a separate reward model
-    \item[-] More computationally expensive (reward model training + RL)
-    \item[-] Reward model can be exploited (reward hacking)
-\end{itemize}
-
-\textbf{DPO}:
-\begin{itemize}
-    \item[+] Simpler---directly optimizes policy from preferences
-    \item[+] No reward model needed, avoiding potential reward hacking
-    \item[+] More stable training (no RL instabilities)
-    \item[-] Limited to offline data---cannot explore new behaviors
-    \item[-] Performance bounded by quality of demonstration data
-    \item[-] Originally designed for bandits; multi-step RL adaptation is approximate
+    \item \textbf{RLHF}: Can achieve higher returns through online exploration, but requires training a separate reward model and is more computationally expensive.
+    \item \textbf{DPO}: Simpler (no reward model needed), more stable training, but limited to behaviors in the dataset and cannot discover new strategies.
+    \item \textbf{SFT}: Simplest approach (just imitation), but ignores preference information and performs worst.
 \end{itemize}
 %%%%% End of 3(d) %%%%%
 }
@@ -678,24 +620,8 @@ python render.py --dpo --checkpoint [PATH TO DPO CHECKPOINT]
 How do they compare? Note that both of them may not look great because they are only trained on a small amount of offline data and have not interacted with the environment during training. But you may still observe that one is slightly better than the other in some videos.
 \answer{
 %%%%% Start of 3(e) %%%%%
-Comparing SFT (left) vs DPO (right) policies across 10 episodes:
 
-\textbf{Observations}:
-\begin{itemize}
-    \item Both policies show limited hopping ability due to being trained only on offline data
-    \item DPO tends to perform slightly better in several episodes, showing more consistent forward progress
-    \item SFT sometimes produces more erratic or unstable movements since it only imitates preferred actions without explicit preference optimization
-    \item Neither policy matches the performance of online RLHF, as expected
-\end{itemize}
-
-\textbf{Key differences}:
-\begin{itemize}
-    \item \textbf{DPO advantage}: By explicitly optimizing to increase probability of preferred actions relative to non-preferred ones, DPO learns more nuanced behavior distinctions
-    \item \textbf{SFT limitation}: SFT only maximizes likelihood of preferred actions, ignoring what makes them preferred over alternatives
-    \item \textbf{Both limitations}: Neither method can discover behaviors outside the training data, so both struggle when the dataset lacks diverse good examples
-\end{itemize}
-
-The results demonstrate that preference information (DPO) provides useful signal beyond simple imitation (SFT), even when both are constrained to offline learning.
+The best DPO training run was \textit{Hopper-v4-dpo-seed=2}. For that one, DPO (right video) seemed to perform better than SFT. Even if none look great, DPO still manages to maintain balance for a couple more seconds than SFT (which falls down pretty quickly), and even when DPO falls, it still manages to keep moving forward by dragging itself, almost seeming like it wants to get up as well.
 %%%%% End of 3(e) %%%%%
 }
 
@@ -725,19 +651,20 @@ Intuitively, as $n_e$ increases the empirical average of the payout $\widehat r_
     Note that, depending on your derivation, you may come up with a tighter upper bound than $|\mathcal{A}|\delta$. This is also acceptable (as long as you argue that your bound is tighter), but showing the inequality above is sufficient.
     \answer{
     %%%%% Start of 4(a) %%%%%
-    Define the ``bad event'' for arm $a$ as:
+
+    Let the ''bad event'' for arm $a$ be:
     \[B_a = \left\{|\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}\right\}\]
 
     By Hoeffding's inequality, for each arm $a$ with $n_e$ samples:
     \[\Pr(B_a) = \Pr\left(|\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}\right) < \delta\]
 
-    The event ``$\exists a \in \mathcal{A}$ s.t. $|\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}$'' is exactly $\bigcup_{a \in \mathcal{A}} B_a$.
+    The event tjat some arm has a large deviation, ''$\exists a \in \mathcal{A}$ s.t. $|\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}$'', is exactly $\bigcup_{a \in \mathcal{A}} B_a$.
 
-    Applying the \textbf{union bound}:
+    Applying the union bound:
     \[\Pr\left(\bigcup_{a \in \mathcal{A}} B_a\right) \leq \sum_{a \in \mathcal{A}} \Pr(B_a) < \sum_{a \in \mathcal{A}} \delta = |\mathcal{A}| \cdot \delta\]
 
     Therefore:
-    \[\boxed{\Pr\left(\exists a \in \mathcal{A} \text{ s.t. } |\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}\right) < |\mathcal{A}|\delta}\]
+    \[\Pr\left(\exists a \in \mathcal{A} \text{ s.t. } |\widehat{r}_a - \overline{r}_a| > \sqrt{\frac{\log(2/\delta)}{2n_e}}\right) < |\mathcal{A}|\delta\]
     %%%%% End of 4(a) %%%%%
     }
 
@@ -755,17 +682,20 @@ Intuitively, as $n_e$ increases the empirical average of the payout $\widehat r_
     How accurately do we need to estimate each arm in order to pick an arm that is $\epsilon$-optimal? Then derive how many total samples we need total (across all arms) to return an $\epsilon$-optimal arm with prob at least 1- $\delta'$ (that satisfies Equation~\ref{eqn:maxa}).  Express your result as a function of the number of actions, the required precision $\epsilon$ and the failure probability $\delta'$.
     \answer{
     %%%%% Start of 4(b) %%%%%
-    \textbf{Required accuracy}: We need each estimate to be within $\frac{\epsilon}{2}$ of its true mean.
+    
+    To guarantee $\epsilon$-optimality, we need each estimate to be within $\frac{\epsilon}{2}$ of its true mean.
 
-    \textbf{Proof}: Suppose $|\widehat{r}_a - \overline{r}_a| \leq \frac{\epsilon}{2}$ for all $a$. Then:
+    Suppose $|\widehat{r}_a - \overline{r}_a| \leq \frac{\epsilon}{2}$ for all $a$ (good event). Then:
     \begin{align*}
     \overline{r}_{a^\dagger} &\geq \widehat{r}_{a^\dagger} - \frac{\epsilon}{2} & \text{(by accuracy bound)}\\
     &\geq \widehat{r}_{a^\star} - \frac{\epsilon}{2} & \text{(since } a^\dagger = \arg\max_a \widehat{r}_a\text{)}\\
     &\geq \overline{r}_{a^\star} - \frac{\epsilon}{2} - \frac{\epsilon}{2} & \text{(by accuracy bound)}\\
-    &= \overline{r}_{a^\star} - \epsilon
+    \overline{r}_{a^\dagger} &\geq \overline{r}_{a^\star} - \epsilon
     \end{align*}
 
-    \textbf{Sample complexity}: From part (a), we need:
+    So $\overline r_{a^\dagger}$ is $\epsilon$-optimal whenever all arms are estimated within $\epsilon/2$
+    
+    From part (a), we need:
     \[\sqrt{\frac{\log(2/\delta)}{2n_e}} \leq \frac{\epsilon}{2}\]
 
     Solving for $n_e$:
@@ -776,15 +706,15 @@ Intuitively, as $n_e$ increases the empirical average of the payout $\widehat r_
     Substituting:
     \[n_e \geq \frac{2\log(2|\mathcal{A}|/\delta')}{\epsilon^2}\]
 
-    \textbf{Total samples} (across all $|\mathcal{A}|$ arms):
-    \[\boxed{N_{\text{total}} = |\mathcal{A}| \cdot n_e \geq \frac{2|\mathcal{A}|\log(2|\mathcal{A}|/\delta')}{\epsilon^2}}\]
+    Therefore, the total samples across all $|\mathcal{A}|$ arms is:
+    \[N_{\text{total}} = |\mathcal{A}| n_e \geq \frac{2|\mathcal{A}|\log(2|\mathcal{A}|/\delta')}{\epsilon^2}\]
     %%%%% End of 4(b) %%%%%
     }
 
     \item[(c)] (Optional challenge, will not be graded) The above derivation only assumed the outcomes were bounded between 0 and 1. In practice people often assume outcomes are drawn from a parametric distribution, and under mild assumptions, one can use the central limit theorem to assume the average outcomes for an arm will follow a normal distribution. Repeat the above analysis under this assumption, for a multi-armed bandit with two arms. Is the resulting number of samples significantly smaller under these assumptions? In real settings it is often very expensive to run experiments. Do you think the method and bound derived in (a-b) would be preferable to making a normal assumption and why or why not?
     \answer{
     %%%%% Start of 4(c) %%%%%
-    (Optional - not graded)
+
     %%%%% End of 4(c) %%%%%
     }
 
