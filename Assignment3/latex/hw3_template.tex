@@ -206,43 +206,31 @@ In Assignment 2 you applied PPO to solve an environment with a provided reward f
     \item[(a)] Why is reward engineering usually hard? What are potential risks that come with specifying an incorrect reward function? Provide an example of a problem and a reward function that appears to be adequate but may have unintended consequences.
     \answer{
     %%%%% Start of 1(a) %%%%%
-    Reward engineering is hard because:
-    \begin{itemize}
-        \item It requires precisely translating complex human goals into a mathematical function, which is inherently ambiguous.
-        \item The reward function must capture all aspects of desired behavior, but humans often have implicit preferences that are difficult to formalize.
-        \item Small changes in the reward can lead to drastically different learned behaviors (reward hacking).
-    \end{itemize}
 
-    \textbf{Potential risks} of incorrect reward functions include:
-    \begin{itemize}
-        \item \textbf{Reward hacking}: The agent finds unintended ways to maximize reward that don't align with the true objective.
-        \item \textbf{Side effects}: The agent may cause harm to achieve its goal because the reward doesn't penalize such behaviors.
-        \item \textbf{Distributional shift}: The reward may work well in training but fail in deployment scenarios.
-    \end{itemize}
+    Reward engineering is hard because requires translating human goals and aspects of desired behavior into mathematical functions, wich is sometimes difficult to formulate. 
 
-    \textbf{Example}: Consider a cleaning robot with reward function $r = \text{(amount of dirt cleaned)}$. This appears adequate, but the robot might learn to:
-    \begin{itemize}
-        \item Spread dirt around first, then clean it (creating more opportunities for reward)
-        \item Damage furniture to access hard-to-reach dirt
-        \item Operate continuously without regard for energy consumption or noise
-    \end{itemize}
+    Some risks of specifying an incorrect reward function include reward hacking, where the agent fins unintended ways to mazimize reward that don't align with the true objective, unwanted side effects that not being penalized and may cause harm in achieving the goal, or rewards that work well in training, but fail in deployment.
+
+    For example, rewarding a cleaning robot only for the amount of dirt collected can incentivice it to spill dirt first, then clean it, damage furniture to access dirt that is hard to reach, or act noisy, dangerously, etc.
+
     %%%%% End of 1(a) %%%%%
     }
 
     \item[(b)] Read the description of the \href{https://gymnasium.farama.org/environments/mujoco/hopper/}{Hopper environment}. Using your own words, describe the goal of the environment, and how each term of the reward functions contributes to encourage the agent to achieve it.
     \answer{
     %%%%% Start of 1(b) %%%%%
+
     \textbf{Goal}: The Hopper is a one-legged robot that should learn to hop forward as fast as possible while maintaining balance.
 
     \textbf{Reward function}: $r = r_{\text{healthy}} + r_{\text{forward}} - r_{\text{ctrl}}$
 
-    Each term contributes as follows:
+    where
     \begin{itemize}
-        \item \textbf{Healthy reward} ($r_{\text{healthy}} = 1$): A constant reward given at each timestep when the hopper is in a ``healthy'' state. This encourages the agent to stay upright and balanced, preventing it from falling.
+        \item \textbf{Healthy reward} ($r_{\text{healthy}} = 1$): constant reward given at each timestep when the hopper is in a ''healthy'' state, to encourage the agent to not fall.
 
-        \item \textbf{Forward reward} ($r_{\text{forward}} = v_x \cdot \text{forward\_reward\_weight}$): Proportional to the hopper's forward velocity. This directly incentivizes the agent to move forward as fast as possible, which is the primary objective.
+        \item \textbf{Forward reward} ($r_{\text{forward}} = v_x \cdot \text{forward\_reward\_weight}$): proportional to the hopper's forward velocity, which incentivizes the agent to move forward as fast as possible.
 
-        \item \textbf{Control cost} ($r_{\text{ctrl}} = \text{ctrl\_cost\_weight} \cdot \|a\|_2^2$): A penalty proportional to the squared magnitude of the actions. This discourages the agent from using unnecessarily large control inputs, promoting energy-efficient and smooth movements.
+        \item \textbf{Control cost} ($r_{\text{ctrl}} = \text{ctrl\_cost\_weight} \cdot \|\text{action}\|_2^2$): to discourage the agent from taking large control actions, promoting smooth movements.
     \end{itemize}
     %%%%% End of 1(b) %%%%%
     }
@@ -250,18 +238,19 @@ In Assignment 2 you applied PPO to solve an environment with a provided reward f
     \item[(c)] By default, the episode terminates when the agent leaves the set of ``healthy'' states. What do these ``healthy'' states mean? Name one advantage and one disadvantage of this early termination.
     \answer{
     %%%%% Start of 1(c) %%%%%
-    \textbf{Healthy states} are defined by the following conditions:
+
+    The healthy states are defined by the following conditions:
     \begin{itemize}
-        \item The hopper's height (z-coordinate of the torso) is within $[0.7, +\infty)$ meters
+        \item Observations are contained in the interval $[-100,100]$
+        \item The hopper's height is within $[0.7, +\infty)$ meters
         \item The torso angle is within $[-0.2, 0.2]$ radians
-        \item All state values are finite (no NaN or Inf)
     \end{itemize}
 
-    These constraints ensure the hopper remains upright and hasn't fallen over.
+    These constraints ensure the hopper remains upright and doesn't fallen over.
 
-    \textbf{Advantage of early termination}: It significantly speeds up training by not wasting time simulating states where the robot has already fallen and cannot recover. This allows the agent to focus on learning productive behaviors rather than exploring unrecoverable failure states.
-
-    \textbf{Disadvantage of early termination}: It can bias the learned policy by preventing the agent from learning how to recover from near-failure states. The agent may become overly conservative or brittle, never learning to operate near the boundaries of the healthy region where potentially efficient but risky behaviors exist.
+    \textbf{Advantage}: speeds up training by not wasting time simulating states where the robot has already fallen and cannot recover.
+    
+    \textbf{Disadvantage}: can bias the learned policy by preventing the agent from learning how to recover from near-failure states, never learning to operate near the boundaries of the healthy region.
     %%%%% End of 1(c) %%%%%
     }
 
@@ -299,20 +288,20 @@ python plot.py --directory results --seeds 1,2,3 --output results/hopper.png
         \caption{PPO training on Hopper with and without early termination across 3 seeds.}
     \end{figure}
 
-    \textbf{Performance analysis}:
+    \textbf{Performance in terms of training epochs and wall time}:
     \begin{itemize}
-        \item \textbf{With early termination}: Training converges faster because episodes terminate quickly when the agent falls, allowing more episodes to be run in the same wall time. The agent learns to maintain balance earlier.
-        \item \textbf{Without early termination}: Training is slower per epoch because episodes run to completion even after falling. However, the agent may learn more robust behaviors since it experiences the full state space.
+        \item \textbf{With early termination}: Wall time $\approx 55$ minutes per seed. Each epoch completes faster because episodes terminate early when the agent falls, allowing more episodes to be collected per unit time. The agent reaches good performance earlier in training (fewer epochs needed to learn balance).
+        \item \textbf{Without early termination}: Wall time $\approx 55$--$65$ minutes per seed. Episodes run to full length even after falling, so fewer episodes are collected per epoch. However, the agent eventually achieves higher final returns (mean 1991.77 vs 1666.04) as it learns from the complete state space.
     \end{itemize}
 
-    \textbf{Standard error}: The standard error across seeds is moderate, indicating some variability in training outcomes. This is expected in RL due to exploration randomness and environment stochasticity.
+    The standard error is low for early termination (Std = 150.76) and high without early termination (Std = 690.03). The high variance without early termination suggests that some seeds find good policies while others get stuck, indicating sensitivity to initialization and exploration.
 
-    \textbf{Better estimate}: To obtain a better estimate of the average return, we could:
+    To obtain a better estimate of the average return, we could:
     \begin{itemize}
-        \item Use more random seeds (e.g., 10+ seeds) to reduce variance in the estimate
+        \item Use more random seeds to reduce variance in the estimate
         \item Run more evaluation episodes per checkpoint
-        \item Use a larger evaluation seed set that differs from training seeds
-        \item Apply bootstrapping or cross-validation techniques
+        %\item Perform multiple evaluation runs at the end of training and average
+        %\item Use bootstrapping to construct confidence intervals
     \end{itemize}
     %%%%% End of 1(d) %%%%%
     }
@@ -334,26 +323,17 @@ python plot.py --directory results --seeds 1,2,3 --output results/hopper.png
     Does the agent successfully complete the assigned task? Does it complete it in the way you would expect it to, or are you surprised by the agent behavior?
     \answer{
     %%%%% Start of 1(e) %%%%%
-    Yes, the agent successfully learns to hop forward. The hopper maintains balance and achieves forward locomotion throughout the episode.
 
-    The behavior is somewhat surprising in that the learned hopping gait may not look like a natural or intuitive hopping motion. The agent discovers an efficient but unusual gait that maximizes the reward function---demonstrating how RL agents can find unexpected solutions that technically satisfy the objective without matching human intuitions about ``correct'' hopping.
+    Inspecting \textit{Hopper-v4-early-termination=False-seed=1}, I observe that the agent does move forward at a relatively fast pace, but not in the expected manner. Instead, it appears to drag itself along the floor, occasionally making contact with it, before recovering just enough to continue progressing.
+    At first glance, this behavior was unexpected; however, the absence of early termination may explain it, as the agent can learn policies that operate near the boundary of the healthy state constraints while still remaining valid.
     %%%%% End of 1(e) %%%%%
     }
 
     \item[(f)] Render another video with another policy. How do the two rollouts compare? Do you prefer one over the other?
     \answer{
     %%%%% Start of 1(f) %%%%%
-    Comparing two policies (e.g., one trained with early termination and one without, or two different seeds):
-
-    The two rollouts show different hopping styles/gaits. Key differences may include:
-    \begin{itemize}
-        \item \textbf{Speed}: One policy may achieve faster forward velocity
-        \item \textbf{Stability}: One may appear more balanced or less wobbly
-        \item \textbf{Efficiency}: One may use smoother, more economical movements
-        \item \textbf{Risk tolerance}: The policy trained without early termination might take riskier positions
-    \end{itemize}
-
-    Personal preference would depend on the specific realizations. A policy that achieves high reward while appearing stable and natural would be preferred. However, both demonstrate the core capability of forward locomotion, highlighting that multiple solutions can achieve similar objective values while exhibiting qualitatively different behaviors.
+    
+    Comparing the policy from \texttt{Hopper-v4-early-termination=True-seed=1} with the previous one, the two rollouts exhibit different hopping styles: the early-termination policy displays a more ``natural'' hopping gait but eventually falls and fails to recover, while the non-early-termination policy drags itself along the floor in an unconventional manner but maintains faster forward progress. I prefer the early-termination policy aesthetically since it resembles natural hopping, but the non-early-termination policy actually achieves better forward velocity according to the reward function, demonstrating that multiple valid solutions can emerge with qualitatively different behaviors.
     %%%%% End of 1(f) %%%%%
     }
 
@@ -397,6 +377,7 @@ We parameterize $\hat{r}(o, a)$ with a neural network $\theta$, i.e. $\hat{r}_\t
 \item [(a)] First write $\nabla_\theta \log \hat{P}[\sigma^1 \succ \sigma^2]$ as a function of $\nabla_\theta \hat{r}_\theta(o^j_i, a^{j}_i)$ where $i = 0, ..., T$ and $j = 1, 2$. You may find it useful to rewrite $\hat{P}$ as $\sigma(z_\theta)$ where $\sigma$ is sigmoid and $z_\theta$ is some function of $\theta$.
 \answer{
 %%%%% Start of 2(a) %%%%%
+
 Define cumulative rewards:
 \[R^1 = \sum_{i=0}^{T} \hat{r}_\theta(o^1_i, a^1_i), \quad R^2 = \sum_{i=0}^{T} \hat{r}_\theta(o^2_i, a^2_i)\]
 
@@ -412,7 +393,7 @@ Using the chain rule and the derivative of log-sigmoid: $\frac{d}{dz}\log\sigma(
 
 Since $\nabla_\theta z_\theta = \nabla_\theta R^1 - \nabla_\theta R^2 = \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)$:
 
-\[\boxed{\nabla_\theta \log \hat{P}[\sigma^1 \succ \sigma^2] = \left(1 - \hat{P}[\sigma^1 \succ \sigma^2]\right)\left(\sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)\right)}\]
+\[\nabla_\theta \log \hat{P}[\sigma^1 \succ \sigma^2] = \left(1 - \hat{P}[\sigma^1 \succ \sigma^2]\right)\left(\sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)\right)\]
 %%%%% End of 2(a) %%%%%
 }
 
@@ -420,6 +401,7 @@ Since $\nabla_\theta z_\theta = \nabla_\theta R^1 - \nabla_\theta R^2 = \sum_{i=
 \end{enumerate}
 \answer{
 %%%%% Start of 2(b) %%%%%
+
 The loss is:
 \[\mathcal{L}(\hat{r}) = -\sum_{(\sigma^1, \sigma^2, \mu) \in \mathcal{D}} \mu \log \hat{P}[\sigma^1 \succ \sigma^2] + (1-\mu) \log(1 - \hat{P}[\sigma^1 \succ \sigma^2])\]
 
@@ -440,7 +422,7 @@ Substituting and simplifying (where $P = \hat{P}[\sigma^1 \succ \sigma^2]$):
 
 Since $\nabla_\theta z_\theta = \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)$:
 
-\[\boxed{\nabla_\theta \mathcal{L}(\hat{r}) = \sum_{(\sigma^1, \sigma^2, \mu) \in \mathcal{D}} \left(\hat{P}[\sigma^1 \succ \sigma^2] - \mu\right)\left(\sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)\right)}\]
+\[\nabla_\theta \mathcal{L}(\hat{r}) = \sum_{(\sigma^1, \sigma^2, \mu) \in \mathcal{D}} \left(\hat{P}[\sigma^1 \succ \sigma^2] - \mu\right)\left(\sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^1_i, a^1_i) - \sum_{i=0}^{T}\nabla_\theta\hat{r}_\theta(o^2_i, a^2_i)\right)\]
 %%%%% End of 2(b) %%%%%
 }
 
