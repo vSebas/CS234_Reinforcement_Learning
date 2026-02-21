@@ -742,116 +742,38 @@ Additionally, the app has metadata about users, such as:
     \item[(a)]  Which of the given data about users represent the stated preferences of the user, and which represents the  revealed preferences?
     \answer{
     %%%%% Start of 5(a) %%%%%
-    \textbf{Stated preferences} (what users explicitly say they want):
-    \begin{itemize}
-        \item User Profiles: topics users say they are interested in
-        \item User Profiles: preferred format (videos, podcasts, etc.)
-    \end{itemize}
 
-    \textbf{Revealed preferences} (what users' actions demonstrate they want):
-    \begin{itemize}
-        \item Interaction data: which articles users lingered on
-        \item Interaction data: how long they lingered
-        \item Interaction data: what they shared and with whom
-        \item Engagement metrics: frequency of app usage
-        \item Engagement metrics: average time spent on app
-    \end{itemize}
-
-    \textbf{Neither stated nor revealed preferences} (metadata about users, not preferences):
-    \begin{itemize}
-        \item Location, browser type
-        \item Revenue potential / subscription status
-    \end{itemize}
+    \textbf{Stated preferences}: user profiles (topics users say they are interested in and preferred format)
+    \textbf{Revealed preferences}: interaction data and engagement metrics
     %%%%% End of 5(a) %%%%%
     }
 
     \item[(b)] What reward function might a company pick?
     \answer{
     %%%%% Start of 5(b) %%%%%
+
     A company might pick a reward function that combines multiple objectives:
 
-    \[r = w_1 \cdot \text{engagement} + w_2 \cdot \text{retention} + w_3 \cdot \text{revenue}\]
+    \[r = c_1 \cdot \text{engagement} + c_2 \cdot \text{retention} + c_3 \cdot \text{revenue}\]
 
-    Specific components could include:
-    \begin{itemize}
-        \item \textbf{Click-through rate}: Did the user click on the recommended article?
-        \item \textbf{Dwell time}: How long did the user spend reading/watching?
-        \item \textbf{Session length}: Total time spent on app per session
-        \item \textbf{Return visits}: Probability user returns within 24 hours
-        \item \textbf{Shares}: Did the user share content (viral growth)?
-        \item \textbf{Subscription conversion}: Did the user upgrade to premium?
-        \item \textbf{Ad revenue}: Revenue generated from ads shown during session
-    \end{itemize}
-
-    Companies often prioritize revealed preferences (engagement metrics) over stated preferences because they directly correlate with business metrics. However, this can lead to optimizing for addictive rather than genuinely valuable content.
+    Could also include info about return visits, time spent on app, user clicks on articles, etc.
     %%%%% End of 5(b) %%%%%
     }
 
     \item[(c)] Assume the company wants to optimize its news feed to cater to user's preferences.  What are the ethical considerations of prioritizing the user's stated preferences vs revealed preferences?
     \answer{
     %%%%% Start of 5(c) %%%%%
-    \textbf{Ethical considerations for revealed preferences}:
-    \begin{itemize}
-        \item[--] May exploit psychological vulnerabilities (doom-scrolling, outrage addiction)
-        \item[--] Can create filter bubbles and echo chambers
-        \item[--] Optimizes for what captures attention, not what's beneficial
-        \item[--] May promote sensationalist or misleading content that generates clicks
-        \item[--] Users may regret time spent (revealed $\neq$ reflective preference)
-        \item[+] Reflects actual behavior rather than aspirational self-image
-    \end{itemize}
 
-    \textbf{Ethical considerations for stated preferences}:
-    \begin{itemize}
-        \item[+] Respects user autonomy and explicit choices
-        \item[+] Aligns with users' reflective, considered preferences
-        \item[+] Less likely to exploit cognitive biases
-        \item[--] Users may not know what they actually want
-        \item[--] Stated preferences may be aspirational but not realistic
-        \item[--] Can miss content users would genuinely enjoy but didn't know to request
-    \end{itemize}
+    Prioritizing revealed preferences risks exploiting psychological vulnerabilities like doom-scrolling or outrage addiction, and can create filter bubbles where users only see reinforcing content. On the other hand, stated preferences respect user autonomy but may be aspirational rather than realistic (as in users don't always know what they truly want).
 
-    \textbf{Recommendation}: A balanced approach that primarily respects stated preferences while using revealed preferences to surface relevant content within those boundaries---never overriding explicit user choices with engagement optimization.
     %%%%% End of 5(c) %%%%%
     }
 
     \item[(d)] Suggest a way to incorporate exploration  to test whether a user's preferences (stated or revealed) might evolve over time.
     \answer{
     %%%%% Start of 5(d) %%%%%
-    Several exploration strategies can help detect evolving preferences:
 
-    \textbf{1. $\epsilon$-greedy exploration}:
-    \begin{itemize}
-        \item With probability $\epsilon$ (e.g., 5-10\%), show content outside the user's typical profile
-        \item Track engagement with exploratory content to detect new interests
-        \item Decay $\epsilon$ for users with stable preferences, increase for new users
-    \end{itemize}
-
-    \textbf{2. Thompson Sampling / UCB}:
-    \begin{itemize}
-        \item Maintain uncertainty estimates for user preferences across topics
-        \item Explore topics with high uncertainty about user interest
-        \item Naturally balances exploitation of known preferences with exploration
-    \end{itemize}
-
-    \textbf{3. Temporal preference modeling}:
-    \begin{itemize}
-        \item Use time-decayed weights on historical interactions
-        \item More recent behavior weighted higher than older behavior
-        \item Periodically ``forget'' old preferences to allow rediscovery
-    \end{itemize}
-
-    \textbf{4. Contextual bandits}:
-    \begin{itemize}
-        \item Model preferences as context-dependent (time of day, device, location)
-        \item Explore when context changes significantly
-        \item Allow different preference profiles for different contexts
-    \end{itemize}
-
-    \textbf{5. Explicit preference refresh}:
-    \begin{itemize}
-        \item Periodically prompt users to update stated preferences
-        \item A/B test whether stated preferences have drifted from revealed behavior
-    \end{itemize}
+    We could occasionally show content outside the user's known preferences and observe whether they engage with it (if they do, it signals their preferences may be evolving). A simple approach is $\epsilon$-greedy exploration: with small probability (e.g., 5--10\%), recommend content from topics the user hasn't explicitly preferred, then track engagement. If the user interacts positively, update their preference model accordingly.
     %%%%% End of 5(d) %%%%%
     }
 

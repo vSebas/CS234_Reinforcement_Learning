@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1771653794.6186 "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Assignment3/latex/hw3_template.tex" "hw3_template.pdf" "hw3_template" 1771653796.05848 0
-  "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Assignment3/latex/hw3_template.tex" 1771653794.55016 51199 fbbbc3fffe0b2fec66c00e225cbeb18f ""
+["pdflatex"] 1771700338.55472 "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Assignment3/latex/hw3_template.tex" "hw3_template.pdf" "hw3_template" 1771700340.54445 0
+  "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Assignment3/latex/hw3_template.tex" 1771700338.51674 47501 453ef13dd4ba322eb0ccec411d479203 ""
   "/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc" 1767555874 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1767555874 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/share/texmf-dist/fonts/tfm/adobe/courier/pcrr7t.tfm" 1767555874 960 379cc0019370a9e0208a0a3f949f847a ""
@@ -237,9 +237,9 @@
   "/usr/share/texmf-dist/web2c/texmf.cnf" 1767555874 42087 b0f9697c952c8f5a8eede4134282cb0d ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1771557395 325717 59a65e600f662ceace641c3ea8b5d4af ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1771557379 2008241 7ef6033d199478082d114cf982d1a8ea ""
-  "hw3_template.aux" 1771653795.96316 2342 45ec243392b8d1c1d490480e56a8107c "pdflatex"
-  "hw3_template.out" 1771653795.96316 2409 7f58c2fb4d3c9e02da7990108b404dfb "pdflatex"
-  "hw3_template.tex" 1771653794.55016 51199 fbbbc3fffe0b2fec66c00e225cbeb18f ""
+  "hw3_template.aux" 1771700340.41691 2342 45ec243392b8d1c1d490480e56a8107c "pdflatex"
+  "hw3_template.out" 1771700340.41791 2409 7f58c2fb4d3c9e02da7990108b404dfb "pdflatex"
+  "hw3_template.tex" 1771700338.51674 47501 453ef13dd4ba322eb0ccec411d479203 ""
   "img/hopper.png" 1771612765.12342 80425 ace3dec35dc8176a53f3d4ae434cbe25 ""
   "img/hopper_dpo.png" 1771612783.69249 30971 20cf5f16dfe5e0dc4fd5d2a1bc230889 ""
   "img/hopper_rlhf.png" 1771612779.67348 82170 27bcacc191b4f7e024a372128a3a67fe ""
