@@ -1,0 +1,29 @@
+\begin{thebibliography}{4}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Aggarwal \& Gerdes(2025)Aggarwal and Gerdes]{aggarwal2025friction}
+Aggarwal, R. and Gerdes, J.~C.
+\newblock Friction-robust autonomous racing using trajectory optimization over multiple models.
+\newblock \emph{IEEE Open Journal of Control Systems}, 2025.
+\newblock \doi{10.1109/OJCSYS.2025.3635449}.
+
+\bibitem[Chen et~al.(2021)Chen, Lu, Rajeswaran, Lee, Grover, Laskin, Abbeel, Srinivas, and Mordatch]{chen2021decision}
+Chen, L., Lu, K., Rajeswaran, A., Lee, K., Grover, A., Laskin, M., Abbeel, P., Srinivas, A., and Mordatch, I.
+\newblock Decision transformer: Reinforcement learning via sequence modeling.
+\newblock In \emph{Advances in Neural Information Processing Systems}, volume~34, pp.\  15084--15097, 2021.
+
+\bibitem[Guffanti \& D'Amico(2024)Guffanti and D'Amico]{guffanti2024transformers}
+Guffanti, T. and D'Amico, S.
+\newblock Transformers for trajectory optimization with application to spacecraft rendezvous.
+\newblock In \emph{IEEE Aerospace Conference}, pp.\  1--15. IEEE, 2024.
+
+\bibitem[Janner et~al.(2021)Janner, Li, and Levine]{janner2021offline}
+Janner, M., Li, Q., and Levine, S.
+\newblock Offline reinforcement learning as one big sequence modeling problem.
+\newblock In \emph{Advances in Neural Information Processing Systems}, volume~34, pp.\  1273--1286, 2021.
+
+\end{thebibliography}
