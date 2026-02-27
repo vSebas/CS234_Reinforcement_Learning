@@ -111,64 +111,46 @@ Here, $u_x$ and $u_y$ are body-frame longitudinal and lateral speeds, $r$ is yaw
 %\end{equation}
 
 %where $\kappa(s)$ is track curvature. The time state $t$ accumulates elapsed time along the lap.
+\subsection{Vehicle model and minimum-time NLP}
 
-The optimization objective minimizes final time $t_N$, regularized with a control-smoothness term:
+The optimization problem finds a minimum-time trajectory that respects vehicle dynamics, track limits, and numerical conditioning constraints. The NLP is:
 \begin{equation}
-\min_{\mathbf{X},\mathbf{U}}
-\; J
-= t_N
-+ \lambda_u\sum_{k=0}^{N-1}\|\mathbf{u}_{k+1}-\mathbf{u}_k\|_2^2.
+\begin{aligned}
+\min_{\mathbf{X},\mathbf{U}}\quad
+& t_N + \lambda_u \sum_{k=0}^{N-1}\|\mathbf{u}_{k+1}-\mathbf{u}_k\|_2^2\\
+\text{s.t.}\quad
+& \mathbf{x}_{k+1}
+=\mathbf{x}_k+\frac{\Delta s}{2}\left(f_{s,k}+f_{s,k+1}\right),\\
+& \dot{s}_k \ge \varepsilon_s,\qquad
+1-\kappa(s_k)e_k \ge \varepsilon_\kappa,\\
+& e_{\min}(s_k)\le e_k\le e_{\max}(s_k),\\
+& \delta_{\min}\le\delta_k\le\delta_{\max},\\
+& F_{x,\min}\le F_{x,k}\le F_{x,\max},\qquad k=0,\dots,N.
+\end{aligned}
 \end{equation}
-State evolution is enforced with trapezoidal collocation in spatial form:
-\begin{equation}
-\mathbf{x}_{k+1}=\mathbf{x}_k
-+\frac{\Delta s}{2}
-\left(
-f_s(\mathbf{x}_k,\mathbf{u}_k)
-+f_s(\mathbf{x}_{k+1},\mathbf{u}_{k+1})
-\right),
-\end{equation}
-where $f_s(\cdot)$ denotes dynamics per unit arc length. This maintains sparsity and aligns with standard racing optimization practice.
+where $f_{s,k}=f_s(\mathbf{x}_k,\mathbf{u}_k)$. The first constraint enforces trapezoidal collocation in the spatial domain; the remaining constraints enforce forward progress, Frenet regularity, and track/actuator limits. Periodic boundary conditions are imposed on all variables except time ($\mathbf{x}_0=\mathbf{x}_N$, $\mathbf{u}_0=\mathbf{u}_N$, $t_0=0$, $t_N$ free). The resulting sparse NLP is implemented in CasADi and solved with IPOPT.
 
-Hard constraints include:
-\begin{align}
-\dot{s}_k & \ge \varepsilon_s,
-&
-1-\kappa(s_k)e_k & \ge \varepsilon_\kappa,
-\end{align}
-ensuring forward progress and avoiding singular Frenet coordinates, respectively. Additional constraints enforce track bounds and actuator limits on $\delta$ and $F_x$.
-For closed-lap solutions, periodic boundary conditions are imposed on all variables except time: $\mathbf{x}_0=\mathbf{x}_N$ and $\mathbf{u}_0=\mathbf{u}_N$, with $t_0=0$ and $t_N$ unconstrained. The sparse nonlinear program (NLP) is implemented in CasADi and solved with IPOPT.
-\subsection{Obstacle handling and acceptance-gated retries}
-Static circular obstacles are introduced through spatial clearance constraints evaluated at each discretization node:
+\subsection{Obstacle handling}
+
+Static circular obstacles are enforced as clearance constraints at each spatial node:
 \begin{equation}
 \|p(s_k,e_k)-p_{\text{obs},i}\|_2^2
 \ge
-(r_i+m_i+R_{\text{veh}}+c)^2,
+R_{\text{safe},i}^2,
 \end{equation}
-where $p(s,e)$ maps Frenet coordinates to world coordinates, $p_{\text{obs},i}$ and $r_i$ define obstacle $i$, $m_i$ is an obstacle margin, $R_{\text{veh}}$ is an inflated vehicle footprint radius, and $c$ is additional clearance. Node-level enforcement is tractable, and safety is verified with a dense post-solve collision check along each segment.
+where $p(s,e)$ maps Frenet coordinates to world coordinates and 
+$R_{\text{safe},i}$ is the obstacle radius inflated by vehicle footprint and safety margin.
 
-Because IPOPT can converge to a discretized solution that violates dense collision checks—especially under coarse discretization—an \emph{acceptance-gated retry policy} is applied. If IPOPT reports convergence but dense clearance fails beyond tolerance, the same scenario is re-solved with increased node count $N$ and/or finer obstacle sampling. This yields a reliable set of accepted expert demonstrations while surfacing failure modes that warm-starting should reduce.
+These constraints are applied only at discretization nodes for computational efficiency. 
+Because node-level enforcement does not guarantee continuous-time clearance between nodes, 
+each solution is verified with a dense post-solve collision check.
 
-\subsection{Dataset contract (expert trajectories)}
+%If a trajectory violates clearance beyond tolerance, the problem is re-solved with finer discretization. 
+%This \emph{acceptance-gated retry} strategy ensures that all stored expert trajectories are collision-free.
 
-Each accepted solve is recorded as an episode with:
-
-(i) a reproducibility header (map identifier/hash, discretization parameters $N$, $\Delta s$, obstacle list, solver settings, seed),
-
-(ii) per-step arrays $(s_k, \mathbf{x}_k, \mathbf{u}_k, \Delta t_k)$,
-
-and (iii) derived features: global pose $(E_k,N_k,\psi_k)$ from Frenet mapping, local track properties $(\kappa(s_k), \text{half-width})$, and return-to-go defined as
-
-\begin{equation}
-\mathrm{RTG}_k = -\sum_{j=k}^{N-1}\Delta t_j.
-\end{equation}
-
-Including load-transfer states and full solver outputs ensures future extensibility even if the Decision Transformer observes only a subset of states.
-
-\subsection{Decision Transformer warm-start (planned)}
+\subsection{Decision Transformer warm-start}
 
 The Decision Transformer is trained as a causal decoder predicting controls conditioned on past information and return-to-go. At each step $k$, the input vector is
-
 \begin{equation}
 \mathbf{z}_k = [\mathrm{RTG}_k,\; \mathbf{o}_k,\; \mathbf{u}_{k-1}],
 \end{equation}

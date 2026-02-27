@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex example_paper"] 1772155231.94472 "example_paper.aux" "example_paper.bbl" "example_paper" 1772155233.04373 0
+["bibtex example_paper"] 1772156297.62842 "example_paper.aux" "example_paper.bbl" "example_paper" 1772156395.32047 0
   "./example_paper.bib" 1772148692.05849 3338 bde0cf97ed1f48611b551c1560e59cc5 ""
   "./icml2018.bst" 1527188775 27146 2e03d99b59c4d77a0e4191e237e5b913 ""
-  "example_paper.aux" 1772155232.90669 1626 f648fcb28ada70623daf390b80e75bf7 "pdflatex"
+  "example_paper.aux" 1772156395.18927 1626 83b61018c37959bd4f5cbd36af6d40ab "pdflatex"
   (generated)
   "example_paper.bbl"
   "example_paper.blg"
   (rewritten before read)
-["pdflatex"] 1772155232.03947 "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Final Project/icml2018_style/example_paper.tex" "example_paper.pdf" "example_paper" 1772155233.04412 0
-  "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Final Project/icml2018_style/example_paper.tex" 1772155230.51167 16817 87a08af305e60da92403cb8dc6338c84 ""
+["pdflatex"] 1772156394.45222 "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Final Project/icml2018_style/example_paper.tex" "example_paper.pdf" "example_paper" 1772156395.32105 0
+  "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Final Project/icml2018_style/example_paper.tex" 1772156394.21025 15780 5aa3e76ffa279d877d8d094b76287de2 ""
   "/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc" 1767555874 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texmf-dist/fonts/tfm/adobe/times/ptmb7t.tfm" 1767555874 2172 fd0c924230362ff848a33632ed45dc23 ""
   "/usr/share/texmf-dist/fonts/tfm/adobe/times/ptmb8r.tfm" 1767555874 4524 6bce29db5bc272ba5f332261583fee9c ""
@@ -215,10 +215,10 @@
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1771557379 2008241 7ef6033d199478082d114cf982d1a8ea ""
   "algorithm.sty" 1509376974 2302 d2b29bd8abe4b311c2e3cf0641b4549b ""
   "algorithmic.sty" 1509376974 7615 a7a253154ed6d7d83141571d55bc3515 ""
-  "example_paper.aux" 1772155232.90669 1626 f648fcb28ada70623daf390b80e75bf7 "pdflatex"
-  "example_paper.bbl" 1772155232.01468 1958 f786b7115f1ea85f0a8ee6c2a6c5eb4b "bibtex example_paper"
-  "example_paper.out" 1772155232.70768 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "example_paper.tex" 1772155230.51167 16817 87a08af305e60da92403cb8dc6338c84 ""
+  "example_paper.aux" 1772156395.18927 1626 83b61018c37959bd4f5cbd36af6d40ab "pdflatex"
+  "example_paper.bbl" 1772156297.70022 1958 f786b7115f1ea85f0a8ee6c2a6c5eb4b "bibtex example_paper"
+  "example_paper.out" 1772156395.01527 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "example_paper.tex" 1772156394.21025 15780 5aa3e76ffa279d877d8d094b76287de2 ""
   "fancyhdr.sty" 1509376974 21006 088e3513a90ac3aa21515dd46e858ae4 ""
   "icml2018.sty" 1509376974 27191 e6739bad8dc624ef182cd77467319b44 ""
   "img/ipopt_single_stage_trajectory.png" 1772149767.73047 99482 5f6e54f896b26fe8979fcca46f3c5687 ""
