@@ -7,40 +7,29 @@
 
 \bibitem[Aggarwal \& Gerdes(2025)Aggarwal and Gerdes]{aggarwal2025friction}
 Aggarwal, R. and Gerdes, J.~C.
-\newblock Friction-robust autonomous racing using trajectory optimization over
-  multiple models.
+\newblock Friction-robust autonomous racing using trajectory optimization over multiple models.
 \newblock \emph{IEEE Open Journal of Control Systems}, 2025.
 \newblock \doi{10.1109/OJCSYS.2025.3635449}.
 
-\bibitem[Chen et~al.(2021)Chen, Lu, Rajeswaran, Lee, Grover, Laskin, Abbeel,
-  Srinivas, and Mordatch]{chen2021decision}
-Chen, L., Lu, K., Rajeswaran, A., Lee, K., Grover, A., Laskin, M., Abbeel, P.,
-  Srinivas, A., and Mordatch, I.
+\bibitem[Chen et~al.(2021)Chen, Lu, Rajeswaran, Lee, Grover, Laskin, Abbeel, Srinivas, and Mordatch]{chen2021decision}
+Chen, L., Lu, K., Rajeswaran, A., Lee, K., Grover, A., Laskin, M., Abbeel, P., Srinivas, A., and Mordatch, I.
 \newblock Decision transformer: Reinforcement learning via sequence modeling.
-\newblock In \emph{Advances in Neural Information Processing Systems},
-  volume~34, pp.\  15084--15097, 2021.
+\newblock In \emph{Advances in Neural Information Processing Systems}, volume~34, pp.\  15084--15097, 2021.
 
-\bibitem[Guffanti \& D'Amico(2024)Guffanti and
-  D'Amico]{guffanti2024transformers}
+\bibitem[Guffanti \& D'Amico(2024)Guffanti and D'Amico]{guffanti2024transformers}
 Guffanti, T. and D'Amico, S.
-\newblock Transformers for trajectory optimization with application to
-  spacecraft rendezvous.
+\newblock Transformers for trajectory optimization with application to spacecraft rendezvous.
 \newblock In \emph{IEEE Aerospace Conference}, pp.\  1--15. IEEE, 2024.
 
-\bibitem[Kapania et~al.(2015)Kapania, Subosits, and
-  Gerdes]{kapaniagerdes2015sequential}
+\bibitem[Kapania et~al.(2015)Kapania, Subosits, and Gerdes]{kapaniagerdes2015sequential}
 Kapania, N.~R., Subosits, J., and Gerdes, J.~C.
-\newblock A sequential two-step algorithm for fast generation of vehicle racing
-  trajectories.
+\newblock A sequential two-step algorithm for fast generation of vehicle racing trajectories.
 \newblock In \emph{ASME Dynamic Systems and Control Conference (DSCC)}, 2015.
 
-\bibitem[Subosits \& Gerdes(2021)Subosits and
-  Gerdes]{subositsgerdes2021fidelity}
+\bibitem[Subosits \& Gerdes(2021)Subosits and Gerdes]{subositsgerdes2021fidelity}
 Subosits, J.~K. and Gerdes, J.~C.
-\newblock Impacts of model fidelity on trajectory optimization for autonomous
-  vehicles in extreme maneuvers.
-\newblock \emph{IEEE Transactions on Intelligent Vehicles}, 6\penalty0
-  (3):\penalty0 546--557, 2021.
+\newblock Impacts of model fidelity on trajectory optimization for autonomous vehicles in extreme maneuvers.
+\newblock \emph{IEEE Transactions on Intelligent Vehicles}, 6\penalty0 (3):\penalty0 546--557, 2021.
 \newblock \doi{10.1109/TIV.2021.3051325}.
 
 \end{thebibliography}

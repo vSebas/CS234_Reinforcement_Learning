@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.2.19)  26 FEB 2026 15:32
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2026/dev/Arch Linux) (preloaded format=pdflatex 2026.2.19)  26 FEB 2026 17:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -889,11 +889,6 @@ LaTeX Font Info:    Font shape `OML/ptm/m/n' in size <9> not available
 
 
 
-Overfull \hbox (56.01886pt too wide) in paragraph at lines 78--79
- [] 
- []
-
-
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
@@ -904,72 +899,74 @@ ts/enc/dvips/base/8r.enc}
 
 
 ]
-Overfull \hbox (9.30531pt too wide) detected at line 94
-[][][]\OT1/cmr/bx/n/10 x \OT1/cmr/m/n/10 = [\OML/cmm/m/it/10 u[]; u[]; r; \OT1/
-cmr/m/n/10 ^^A\OML/cmm/m/it/10 F[]; \OT1/cmr/m/n/10 ^^A\OML/cmm/m/it/10 F[]; t;
- e; \OT1/cmr/m/n/10 ^^A\OML/cmm/m/it/10  \OT1/cmr/m/n/10 ][]\OML/cmm/m/it/10 ; 
- \OT1/cmr/bx/n/10 u \OT1/cmr/m/n/10 = [\OML/cmm/m/it/10 ^^N; F[]\OT1/cmr/m/n/10
- ][]\OML/cmm/m/it/10 :
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 176--177
+[]\OT1/ptm/m/n/10 (+20) where $\OT1/cmr/bx/n/10 o[]$ \OT1/ptm/m/n/10 (+20) in-c
+ludes ob-serv-able state com-po-nents
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 94--96
-\OT1/ptm/m/n/10 (+20) This state choice ex-tends the stan-dard
+Underfull \hbox (badness 2689) in paragraph at lines 176--177
+\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 u[]; u[]; r; e; \OT1/cmr/m/n/10 ^^A\OML/cmm/m
+/it/10  \OT1/cmr/m/n/10 )$\OT1/ptm/m/n/10 (+20) , lo-cal track fea-tures $\OT1/
+cmr/m/n/10 (\OML/cmm/m/it/10 ^^T; []\OT1/cmr/m/n/10 )$\OT1/ptm/m/n/10 (+20) ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 94--96
-\OT1/cmr/m/n/10 (\OML/cmm/m/it/10 u[]; u[]; r; t; e; \OT1/cmr/m/n/10 ^^A\OML/cm
-m/m/it/10  ; \OT1/cmr/m/n/10 ^^A\OML/cmm/m/it/10 F[]\OT1/cmr/m/n/10 )$ \OT1/ptm
-/m/n/10 (+20) rep-re-sen-ta-tion by re-tain-ing
+Underfull \hbox (badness 1616) in paragraph at lines 176--177
+\OT1/ptm/m/n/10 (+20) and a fixed-size ob-sta-cle ten-sor rep-re-sent-ing the $
+\OML/cmm/m/it/10 M$
  []
 
 
-Overfull \hbox (107.29198pt too wide) detected at line 100
-[][][][] \OT1/cmr/m/n/10 = []\OML/cmm/m/it/10 ;  [] \OT1/cmr/m/n/10 = \OML/cmm/
-m/it/10 u[] [] \OT1/cmr/m/n/10 ^^A\OML/cmm/m/it/10   \OT1/cmr/m/n/10 + \OML/cmm
-/m/it/10 u[] [] \OT1/cmr/m/n/10 ^^A\OML/cmm/m/it/10  ;  \OT1/cmr/m/n/10 ^^A[] =
- \OML/cmm/m/it/10 r \OMS/cmsy/m/n/10 ^^@ \OML/cmm/m/it/10 ^^T\OT1/cmr/m/n/10 (\
-OML/cmm/m/it/10 s\OT1/cmr/m/n/10 )[]\OML/cmm/m/it/10 :
+Underfull \hbox (badness 1360) in paragraph at lines 178--179
+[]\OT1/ptm/m/n/10 (+20) During in-fer-ence, the DT gen-er-ates a full tra-jec-t
+ory
  []
 
 
+Underfull \vbox (badness 2932) has occurred while \output is active []
 
 
 
-[2
-pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) ha
-s been already used, duplicate ignored
-<argument> ...shipout:D \box_use:N \l_shipout_box 
-                                                  \__shipout_drop_firstpage_...
-l.153 
-      ]
-Overfull \hbox (130.9564pt too wide) in paragraph at lines 162--171
+[2]
+Overfull \hbox (130.9564pt too wide) in paragraph at lines 197--206
  [] 
  []
 
-<fig_trajectory.png, id=76, 482.7636pt x 504.9264pt>
-File: fig_trajectory.png Graphic file (type png)
-<use fig_trajectory.png>
-Package pdftex.def Info: fig_trajectory.png  used on input line 188.
-(pdftex.def)             Requested size: 234.8775pt x 245.65947pt.
+<img/ipopt_single_stage_trajectory.png, id=68, 479.8728pt x 370.5042pt>
+File: img/ipopt_single_stage_trajectory.png Graphic file (type png)
+<use img/ipopt_single_stage_trajectory.png>
+Package pdftex.def Info: img/ipopt_single_stage_trajectory.png  used on input l
+ine 223.
+(pdftex.def)             Requested size: 234.8775pt x 181.35077pt.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
-(./example_paper.bbl)
+
+(./example_paper.bbl
 
 [3
 pdfTeX warning (ext4): destination with the same identifier (name{table.1}) has
  been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.214 \end{document}
-                    
-pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) ha
+l.23 
+     
+pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) ha
 s been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.214 \end{document}
-                     <./fig_trajectory.png>] (./example_paper.aux)
+l.23 
+      <./img/ipopt_single_stage_trajectory.png>])
+
+
+
+[4
+
+] (./example_paper.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
@@ -978,13 +975,13 @@ Package rerunfilecheck Info: File `example_paper.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 26348 strings out of 475171
- 499955 string characters out of 5767095
- 948186 words of memory out of 5000000
- 48618 multiletter control sequences out of 15000+600000
- 595704 words of font info for 232 fonts, out of 8000000 for 9000
+ 26229 strings out of 475171
+ 497608 string characters out of 5767095
+ 938554 words of memory out of 5000000
+ 48508 multiletter control sequences out of 15000+600000
+ 595145 words of font info for 227 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 84i,11n,91p,1090b,877s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,11n,91p,1086b,640s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/share/texmf-dist/font
 s/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fonts/type1/public
@@ -992,17 +989,16 @@ s/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fonts/type1/public
 mmi6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/
 share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texmf-dis
 t/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmr5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></u
-sr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/share/texmf-dist/fonts/type
-1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-</usr/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/
-fonts/type1/urw/times/utmri8a.pfb>
-Output written on example_paper.pdf (3 pages, 308487 bytes).
+ublic/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></
+usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/share/texmf
+-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/t
+imes/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/s
+hare/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on example_paper.pdf (4 pages, 267245 bytes).
 PDF statistics:
- 166 PDF objects out of 1000 (max. 8388607)
- 123 compressed objects within 2 object streams
- 29 named destinations out of 1000 (max. 500000)
+ 160 PDF objects out of 1000 (max. 8388607)
+ 118 compressed objects within 2 object streams
+ 28 named destinations out of 1000 (max. 500000)
  58898 words of extra memory for PDF output out of 61914 (max. 10000000)
 
