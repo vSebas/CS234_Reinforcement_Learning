@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex example_paper"] 1772156297.62842 "example_paper.aux" "example_paper.bbl" "example_paper" 1772156395.32047 0
-  "./example_paper.bib" 1772148692.05849 3338 bde0cf97ed1f48611b551c1560e59cc5 ""
+["bibtex example_paper"] 1772160763.77314 "example_paper.aux" "example_paper.bbl" "example_paper" 1772160765.24392 0
+  "./example_paper.bib" 1772160762.10034 3928 a12f87073ecac0bcf17a3cd4732f5dfe ""
   "./icml2018.bst" 1527188775 27146 2e03d99b59c4d77a0e4191e237e5b913 ""
-  "example_paper.aux" 1772156395.18927 1626 83b61018c37959bd4f5cbd36af6d40ab "pdflatex"
+  "example_paper.aux" 1772160764.98836 1598 3552f1b91203bcbc03576344fbf4b91f "pdflatex"
   (generated)
   "example_paper.bbl"
   "example_paper.blg"
   (rewritten before read)
-["pdflatex"] 1772156394.45222 "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Final Project/icml2018_style/example_paper.tex" "example_paper.pdf" "example_paper" 1772156395.32105 0
-  "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Final Project/icml2018_style/example_paper.tex" 1772156394.21025 15780 5aa3e76ffa279d877d8d094b76287de2 ""
+["pdflatex"] 1772160763.86329 "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Final Project/icml2018_style/example_paper.tex" "example_paper.pdf" "example_paper" 1772160765.2445 0
+  "/run/media/saveas/Secondary-Storage/Masters/CS234/CS234_Reinforcement_Learning/Final Project/icml2018_style/example_paper.tex" 1772160746.45324 16028 2222ae72906de6762897ccb97648949b ""
   "/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc" 1767555874 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texmf-dist/fonts/tfm/adobe/times/ptmb7t.tfm" 1767555874 2172 fd0c924230362ff848a33632ed45dc23 ""
   "/usr/share/texmf-dist/fonts/tfm/adobe/times/ptmb8r.tfm" 1767555874 4524 6bce29db5bc272ba5f332261583fee9c ""
@@ -28,9 +28,7 @@
   "/usr/share/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7.tfm" 1767555874 940 228d6584342e91276bf566bcf9716b83 ""
   "/usr/share/texmf-dist/fonts/tfm/public/cm/cmbx10.tfm" 1767555874 1328 c834bbb027764024c09d3d2bf908b5f0 ""
   "/usr/share/texmf-dist/fonts/tfm/public/cm/cmbx5.tfm" 1767555874 1332 f817c21a1ba54560425663374f1b651a ""
-  "/usr/share/texmf-dist/fonts/tfm/public/cm/cmbx6.tfm" 1767555874 1344 8a0be4fe4d376203000810ad4dc81558 ""
   "/usr/share/texmf-dist/fonts/tfm/public/cm/cmbx7.tfm" 1767555874 1336 3125ccb448c1a09074e3aa4a9832f130 ""
-  "/usr/share/texmf-dist/fonts/tfm/public/cm/cmbx9.tfm" 1767555874 1328 5442e22a7072966dbaf88ca900acf3f0 ""
   "/usr/share/texmf-dist/fonts/tfm/public/cm/cmmi6.tfm" 1767555874 1512 f21f83efb36853c0b70002322c1ab3ad ""
   "/usr/share/texmf-dist/fonts/tfm/public/cm/cmmi9.tfm" 1767555874 1524 d89e2d087a9828407a196f428428ef4a ""
   "/usr/share/texmf-dist/fonts/tfm/public/cm/cmr6.tfm" 1767555874 1300 b62933e007d01cfd073f79b963c01526 ""
@@ -215,10 +213,10 @@
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1771557379 2008241 7ef6033d199478082d114cf982d1a8ea ""
   "algorithm.sty" 1509376974 2302 d2b29bd8abe4b311c2e3cf0641b4549b ""
   "algorithmic.sty" 1509376974 7615 a7a253154ed6d7d83141571d55bc3515 ""
-  "example_paper.aux" 1772156395.18927 1626 83b61018c37959bd4f5cbd36af6d40ab "pdflatex"
-  "example_paper.bbl" 1772156297.70022 1958 f786b7115f1ea85f0a8ee6c2a6c5eb4b "bibtex example_paper"
-  "example_paper.out" 1772156395.01527 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "example_paper.tex" 1772156394.21025 15780 5aa3e76ffa279d877d8d094b76287de2 ""
+  "example_paper.aux" 1772160764.98836 1598 3552f1b91203bcbc03576344fbf4b91f "pdflatex"
+  "example_paper.bbl" 1772160763.84135 2511 43d98181b6a394711fea69bc02b55e79 "bibtex example_paper"
+  "example_paper.out" 1772160764.71736 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "example_paper.tex" 1772160746.45324 16028 2222ae72906de6762897ccb97648949b ""
   "fancyhdr.sty" 1509376974 21006 088e3513a90ac3aa21515dd46e858ae4 ""
   "icml2018.sty" 1509376974 27191 e6739bad8dc624ef182cd77467319b44 ""
   "img/ipopt_single_stage_trajectory.png" 1772149767.73047 99482 5f6e54f896b26fe8979fcca46f3c5687 ""

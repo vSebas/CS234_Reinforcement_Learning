@@ -3,44 +3,46 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: example_paper.aux
 The style file: icml2018.bst
 Database file #1: example_paper.bib
-You've used 5 entries,
+Warning--empty journal in radford2019language
+You've used 7 entries,
             2773 wiz_defined-function locations,
-            624 strings with 6007 characters,
-and the built_in function-call counts, 2851 in all, are:
-= -- 255
-> -- 177
+            635 strings with 6295 characters,
+and the built_in function-call counts, 3692 in all, are:
+= -- 323
+> -- 237
 < -- 6
-+ -- 59
-- -- 54
-* -- 226
-:= -- 425
-add.period$ -- 18
-call.type$ -- 5
-change.case$ -- 33
-chr.to.int$ -- 5
-cite$ -- 10
-duplicate$ -- 128
-empty$ -- 220
-format.name$ -- 65
-if$ -- 610
++ -- 79
+- -- 72
+* -- 297
+:= -- 560
+add.period$ -- 26
+call.type$ -- 7
+change.case$ -- 45
+chr.to.int$ -- 7
+cite$ -- 15
+duplicate$ -- 167
+empty$ -- 291
+format.name$ -- 87
+if$ -- 780
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 5
-newline$ -- 35
-num.names$ -- 20
-pop$ -- 68
+missing$ -- 7
+newline$ -- 47
+num.names$ -- 28
+pop$ -- 94
 preamble$ -- 1
-purify$ -- 28
+purify$ -- 38
 quote$ -- 0
-skip$ -- 110
+skip$ -- 135
 stack$ -- 0
-substring$ -- 102
-swap$ -- 27
-text.length$ -- 3
+substring$ -- 106
+swap$ -- 24
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 55
-warning$ -- 0
-while$ -- 23
+type$ -- 77
+warning$ -- 1
+while$ -- 28
 width$ -- 0
-write$ -- 76
+write$ -- 103
+(There was 1 warning)
