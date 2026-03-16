@@ -1,0 +1,38 @@
+\section{Debugging and Diagnosis}
+
+\subsection{What Was Fixed}
+
+The repo records several concrete correctness fixes that materially changed interpretation of earlier results.
+
+\paragraph{Repeated-start evaluation confound.}
+An early no-obstacle benchmark repeated the same start rather than testing distinct frozen anchors. After correcting start-progress variation, the no-obstacle relaxed-gate acceptance changed from $0\%$ to $20\%$ for FT2 + \texttt{soft}. This did not make the DT competitive, but it did invalidate the earlier interpretation.
+
+\paragraph{Warm-start validation bug.}
+Warm-start validation was checking against progress $s=k\,ds$ while rollout generation used $s=s_0 + k\,ds$. This could falsely label nonzero-start rollouts as violating track or obstacle geometry.
+
+\paragraph{Missing padded-context attention mask.}
+Training used an attention mask that hides left padding in short contexts, but early inference rollout was missing this mask. Since most failures occurred in the first $K$ steps and $K=50$, this was a serious train/inference mismatch.
+
+\paragraph{Wrong-side obstacle push projection.}
+When both left and right obstacle-clearance pushes were feasible, the projection could choose the wrong side. This could move the state through the obstacle rather than away from it.
+
+\subsection{Diagnosis Progression}
+
+The project diagnosis evolved in three stages.
+
+\paragraph{Stage 1: early fallback / lateral instability.}
+Trace instrumentation showed that many rejected rollouts triggered fallback at $k=0$ or $k=1$. The raw dynamics step often produced extreme hidden lateral states even when the visible trajectory looked benign after fallback. Representative values in the repo include $u_y$ and $r$ exploding to hundreds in magnitude. This pointed to weak learned lateral-dynamics stability rather than simple geometric drift.
+
+\paragraph{Stage 2: projection-dominated rejection.}
+After some wrapper stabilization, fallback pressure decreased, but many rollouts still accumulated large projection burden. The dominant projection reason was usually \texttt{e\_clip}, sometimes followed by \texttt{dpsi\_clip}. This suggested that the DT was still not maintaining a laterally consistent path under rollout.
+
+\paragraph{Stage 3: wrong-side / wrong-branch lateral behavior.}
+After the major correctness fixes, the dominant failure changed again. In the final failure-conditioned trace rerun:
+\begin{itemize}
+\item no-obstacle scenarios first hit \texttt{e\_clip} at $k=10$ in all 3 traced cases, with fallback count 0;
+\item obstacle scenarios first hit \texttt{e\_clip} at $k=13$--$15$, with fallback 0--2.
+\end{itemize}
+
+Matched baseline-versus-DT comparisons showed that the DT often chose the wrong lateral branch early. In representative no-obstacle and obstacle cases, baseline steering kept the vehicle on the negative-$e$ side while the DT steered toward positive $e$ and crossed the soft boundary. In other cases the DT stayed on the same side but moved outward too aggressively.
+
+This is the final diagnosis supported by the repo state: the dominant remaining deployment error is not simply that the model needs looser thresholds. It is that early lateral control selection is often wrong in sign or too aggressive in magnitude, and projection only exposes that mistake.

@@ -1,0 +1,38 @@
+\section{Evaluation Protocol}
+
+\subsection{Primary Deployment Metrics}
+
+The report uses the repo's downstream warm-start metrics rather than offline loss alone:
+\begin{itemize}
+\item solver success rate,
+\item solver iterations,
+\item solver solve time,
+\item total DT time = warm-start inference + solve time,
+\item warm-start acceptance rate,
+\item fallback count,
+\item projection fraction,
+\item projection total magnitude,
+\item projection max-step magnitude.
+\end{itemize}
+
+A central lesson of the project is that validation loss and deployment metrics must be separated. Several later checkpoints improved offline and still failed to improve solver-facing behavior.
+
+\subsection{Benchmark Scope}
+
+The final narrowed benchmark uses two frozen Oval gates:
+\begin{itemize}
+\item no-obstacle gate,
+\item 1--4 obstacle gate.
+\end{itemize}
+
+Most completed controlled evaluations use IPOPT rather than FATROP. This was a practical choice: FATROP remained the main generation path for clean training data, but IPOPT was used for fixed-gate diagnostic evaluations because it was faster and more reliable for repeated interactive benchmarking.
+
+\subsection{Important Evaluation Caveats}
+
+Three caveats are required for faithful interpretation.
+
+First, an early no-obstacle evaluation was confounded by repeated starts. The evaluation path was effectively repeating the same start configuration, so an initial 10-scenario no-obstacle gate was not actually testing 10 distinct start anchors. This was later corrected.
+
+Second, the \texttt{lap\_time\_s} field stored in evaluation outputs corresponds to the optimizer objective value rather than a pure terminal-time readout, so we do not use it as a primary KPI in this report.
+
+Third, acceptance rates depend strongly on the rejection gate. A corrected relaxed-gate diagnostic is useful for understanding rollout quality, but it does not by itself show solver benefit.

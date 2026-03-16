@@ -1,0 +1,61 @@
+\section{Results}
+
+\subsection{Offline Training Improved, But Deployment Did Not}
+
+The strongest offline checkpoint in the final repo state is the failure-conditioned fine-tune, which reduced validation loss from the parent run's $0.002835$ to $0.002364$. The lateral-weighted fine-tune also improved over the parent to $0.002773$. By contrast, the post-projection FT2 rerun was worse offline than the parent ($0.003170$).
+
+This ranking does not match deployment behavior. The repo's own analysis identifies \texttt{oval\_fatrop\_improved\_postproj\_ft2\_rerun + projection=soft} as the strongest DT operating point before the failure-conditioned run, even though it was not the best offline model. This is a useful negative result: the project found a meaningful gap between offline imitation metrics and warm-start utility.
+
+\subsection{Completed Projection Ablation}
+
+A completed 10-scenario-per-gate projection ablation compared the parent improved checkpoint and the post-projection FT2 rerun under \texttt{off}, \texttt{soft}, and \texttt{full} projection modes. The repo's final verdict was:
+\begin{itemize}
+\item best parent regime: \texttt{full},
+\item best FT2 regime: \texttt{soft},
+\item best DT operating point overall: FT2 + \texttt{soft},
+\item no DT variant beat the baseline once warm-start inference time was included,
+\item acceptance remained $0\%$ for all default-gate runs,
+\item iteration reduction remained $0\%$ for all runs.
+\end{itemize}
+
+For example, on the 10-scenario obstacle gate, FT2 + \texttt{soft} had baseline solve time $54.48$s, DT solve time $52.58$s, but DT total time $55.21$s with $0\%$ warm-start acceptance. Similar behavior held on the no-obstacle gate.
+
+\subsection{Corrected Relaxed-Gate Diagnostic}
+
+After fixing the repeated-start confound, the corrected relaxed-gate diagnostic for FT2 + \texttt{soft} showed that acceptance was not literally impossible. On the corrected 10-scenario evaluation:
+\begin{itemize}
+\item no-obstacle gate: acceptance $20\%$, baseline solve time $49.06$s, DT total time $51.98$s, iterations $206.8$ vs baseline $191.8$;
+\item obstacle gate: acceptance $20\%$, baseline solve time $56.36$s, DT total time $60.79$s, iterations $256.0$ vs baseline $230.7$.
+\end{itemize}
+
+These runs are important because they separate two claims:
+\begin{enumerate}
+\item the default gate was partly suppressing acceptance;
+\item even when acceptance is relaxed, the accepted DT rollouts were still not solver-helpful on average.
+\end{enumerate}
+
+\subsection{Final Post-Fix Smoke Benchmark}
+
+The final post-fix smoke rerun focused on the failure-conditioned model, after the key correctness bugs had been fixed. These are small benchmarks with only 3 scenarios per gate and should be interpreted as smoke tests, not definitive leaderboard results. Table~\ref{tab:final-smoke} summarizes them.
+
+\begin{table}[t]
+\centering
+\caption{Final post-fix smoke benchmark for \texttt{oval\_fatrop\_failure\_ft + projection=soft}. Each gate has only 3 scenarios.}
+\label{tab:final-smoke}
+\begin{tabular}{lcccccc}
+\toprule
+Gate & Baseline Solve & DT Solve & DT Total & Iterations (DT/Base) & WS Accept & Fallback Mean \\
+\midrule
+No obstacle & 47.91s & 46.34s & 49.04s & 186.3 / 186.3 & 0\% & 0.0 \\
+1--4 obstacles & 64.85s & 62.47s & 65.18s & 280.7 / 280.7 & 0\% & 1.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These results are consistent with the overall project conclusion. The DT sometimes lowers raw solve time slightly, but once warm-start inference is included, total time is still not better than baseline. More importantly, warm-start acceptance remains $0\%$, and iteration reduction remains $0\%$.
+
+\subsection{Projection Burden in the Final Smoke Benchmark}
+
+The final failure-conditioned smoke rerun also shows why acceptance remained at $0\%$. On the no-obstacle gate, the mean projection total magnitude was $127.29$, the mean max-step projection was $4.91$, and the mean projection fraction was $0.628$. On the obstacle gate, the corresponding values were $121.03$, $4.90$, and $0.544$. These exceed the default gate thresholds even though fallback was already greatly reduced.
+
+This is an important qualitative shift. Earlier failure patterns were dominated by fallback-heavy instability; the final post-fix runs often fail without much fallback at all.

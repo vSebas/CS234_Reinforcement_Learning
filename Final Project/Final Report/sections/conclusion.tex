@@ -1,0 +1,7 @@
+\section{Conclusion}
+
+The final repo state supports a restrained conclusion. The project successfully implemented a DT-based warm-start pipeline for nonlinear minimum-time vehicle trajectory optimization, including rollout generation, repair-data production, and detailed downstream diagnostics. Several substantial bugs and evaluation confounds were found and fixed, and offline training improved meaningfully across successive runs.
+
+However, the final measured deployment outcome is negative. Warm-start acceptance stayed near $0\%$ under the default gate, iteration reduction stayed $0\%$, and no DT variant clearly beat the baseline once warm-start inference was included. A corrected relaxed-gate diagnostic showed that some rollouts could be admitted, but those accepted cases still did not reduce solver work on average.
+
+The most useful final diagnosis is that the remaining bottleneck is early lateral rollout behavior, especially wrong-side or overly aggressive lateral branch selection. The next logical step is therefore not another blind scale-up, but a targeted data intervention around the first clip window ($k\approx 8$--$15$), with explicit supervision for wrong-branch and outward-too-aggressive cases.

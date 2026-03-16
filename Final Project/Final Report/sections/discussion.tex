@@ -1,0 +1,9 @@
+\section{Discussion}
+
+The project produced two useful conclusions.
+
+First, the engineering problem is real. A sequence model can achieve very low offline loss and still fail as a warm-start policy once it is rolled out closed-loop through nonlinear vehicle dynamics. The gap here was not hypothetical; it persisted across multiple dataset interventions and fine-tuning strategies.
+
+Second, the repo identifies a fairly specific next bottleneck. The project no longer appears blocked primarily by generic model capacity or by a single missing wrapper heuristic. The final evidence points to early lateral branch selection under rollout as the core weakness. That finding is stronger than saying ``DT is unstable.'' It says the model often commits to the wrong lateral maneuver early, after which clipping and validation reject the trajectory.
+
+The post-projection and failure-conditioned data interventions were still useful. They improved offline performance and helped expose which failure modes remained after major bugs were removed. The fact that accepted relaxed-gate rollouts were still solver-harmful is also informative: the objective should not be merely to increase acceptance under a wrapper gate, but to produce initializations that genuinely reduce solver work.

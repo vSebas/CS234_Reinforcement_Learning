@@ -1,0 +1,7 @@
+\section{Background and Related Work}
+
+The project combines two established ideas. First, minimum-time racing-style trajectory optimization is naturally posed as a nonlinear program over vehicle dynamics, track constraints, and obstacle-clearance constraints \cite{subositsgerdes2021fidelity,mao2016successive}. Second, Decision Transformer-style sequence modeling treats control as conditional sequence prediction over returns, states, and actions \cite{chen2021decision}.
+
+The motivation for combining them is straightforward: if expert trajectories from a strong optimizer can be collected offline, then a transformer may learn a policy that produces a high-quality initial guess for the same optimizer at test time. In principle, even a partially correct warm-start could reduce solver iterations or solve time. This hybrid use of transformers as optimizer priors is close in spirit to prior transformer-based warm-starting work in trajectory optimization \cite{guffanti2024transformers}.
+
+In this project, however, the relevant question is not whether DT can imitate expert trajectories in distribution, but whether the closed-loop rollout induced by autoregressive action prediction stays inside the dynamically valid and constraint-compatible regime needed for nonlinear warm-starting. That distinction became central in the final diagnosis.

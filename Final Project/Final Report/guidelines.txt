@@ -1,0 +1,175 @@
+  I need you to read a local research/code project and produce a LaTeX-ready final
+  project report draft grounded in the current repo state.
+
+  Context:
+  - This is a CS234 final project on Decision Transformer warm-starts for minimum-
+  time vehicle trajectory optimization with obstacle avoidance.
+  - The codebase includes:
+    - nonlinear trajectory optimization
+    - Decision Transformer training / fine-tuning
+    - warm-start rollout generation
+    - benchmark/evaluation scripts
+    - debugging / ablation / diagnosis notes
+  - I do NOT want a generic ML report.
+  - I want a report that reflects what was actually implemented, measured,
+  debugged, and concluded in the repo.
+
+  Important:
+  - First read and follow the report requirements in:
+    - `CS234_Reinforcement_Learning/Final Project/Final Report/guidelines.txt`
+  - Treat those guidelines as binding constraints on structure, length, emphasis,
+  and deliverables.
+
+  Your task:
+  1. Read the relevant docs/code/artifacts to understand the actual current state.
+  2. Produce:
+     - a report outline,
+     - then a full LaTeX-ready report draft.
+  3. The draft should be written in a sober project-report style appropriate for a
+  CS/RL final project.
+
+  Output requirements:
+  - Write in LaTeX section/subsection structure, but do NOT include a full preamble
+  unless needed.
+  - Use sections like:
+    - `\section{Introduction}`
+    - `\section{Problem Setup}`
+    - `\section{Method}`
+    - `\section{Data and Training Pipeline}`
+    - `\section{Evaluation Protocol}`
+    - `\section{Results}`
+    - `\section{Debugging and Diagnosis}`
+    - `\section{Discussion}`
+    - `\section{Limitations}`
+    - `\section{Conclusion}`
+  - Include tables where appropriate in LaTeX format.
+  - If useful, suggest figures with captions and what they should show.
+  - Be faithful to the repo state.
+  - Do not overclaim success.
+  - If the final result does not convincingly beat baseline, state that clearly.
+
+  Files to read first:
+
+  Report requirements:
+  - `CS234_Reinforcement_Learning/Final Project/Final Report/guidelines.txt`
+
+  Top-level status/docs:
+  - `PLAN.md`
+  - `dt/TRAINING_ANALYSIS.md`
+  - `docs/PROJECTION_ABLATION_RESULTS.md`
+  - `docs/ROLLOUT_DIAGNOSIS_RESULTS.md`
+  - `docs/BUG_AUDIT.md`
+
+  Core implementation:
+  - `planning/dt_warmstart.py`
+  - `experiments/eval_warmstart.py`
+  - `planning/optimizer.py`
+  - `dt/model.py`
+  - `dt/dataset.py`
+  - `dt/train.py`
+  - `dt/run_train.sh`
+
+  Failure-conditioned data pipeline:
+  - `data/build_postprojection_repairs.py`
+  - `data/run_postprojection_repairs_loop.sh`
+  - `data/run_failure_conditioned_then_train.sh`
+
+  Checkpoint configs/metrics:
+  - `dt/checkpoints/oval_fatrop_improved_ctx50_m6x192/config.json`
+  - `dt/checkpoints/oval_fatrop_improved_ctx50_m6x192/metrics.jsonl`
+  - `dt/checkpoints/oval_fatrop_improved_postproj_ft2_rerun/config.json`
+  - `dt/checkpoints/oval_fatrop_improved_postproj_ft2_rerun/metrics.jsonl`
+  - `dt/checkpoints/oval_fatrop_lateral_ft/config.json`
+  - `dt/checkpoints/oval_fatrop_lateral_ft/metrics.jsonl`
+  - `dt/checkpoints/oval_fatrop_failure_ft/config.json`
+  - `dt/checkpoints/oval_fatrop_failure_ft/metrics.jsonl`
+
+  Important eval artifacts:
+  - `dt/checkpoints/oval_fatrop_improved_postproj_ft2_rerun/warmstarts/eval/
+  Oval_Track_260m_obs0-0_seed52_N120/warmstart_eval_20260313_151949_summary.json`
+  - `dt/checkpoints/oval_fatrop_improved_postproj_ft2_rerun/warmstarts/eval/
+  Oval_Track_260m_obs1-4_seed44_N120/warmstart_eval_20260313_151949_summary.json`
+  - `dt/checkpoints/oval_fatrop_failure_ft/warmstarts/eval/Oval_Track_260m_obs0-
+  0_seed52_N120/warmstart_eval_20260314_172050_summary.json`
+  - `dt/checkpoints/oval_fatrop_failure_ft/warmstarts/eval/Oval_Track_260m_obs1-
+  4_seed44_N120/warmstart_eval_20260314_172050_summary.json`
+
+  Important diagnosis artifacts:
+  - `dt/checkpoints/oval_fatrop_failure_ft/warmstarts/eval/Oval_Track_260m_obs0-
+  0_seed52_N120/warmstart_eval_20260314_172050_rollout_trace.jsonl`
+  - `dt/checkpoints/oval_fatrop_failure_ft/warmstarts/eval/Oval_Track_260m_obs1-
+  4_seed44_N120/warmstart_eval_20260314_172050_rollout_trace.jsonl`
+
+  Key instructions:
+  - Clearly distinguish:
+    - planned method vs actual implemented method
+    - offline validation improvements vs downstream deployment metrics
+    - measured facts vs interpretations
+  - Be explicit about the debugging timeline:
+    - repeated-start evaluation confound was fixed
+    - warm-start validation bug (`s0_m` mismatch) was fixed
+    - missing padded-context attention mask in inference was fixed
+    - wrong-side obstacle push projection was fixed
+  - Capture the final diagnosis progression:
+    - early fallback / lateral instability
+    - then projection-dominated rejection
+    - then post-fix identification of wrong-side / wrong-branch lateral control
+  behavior
+  - Include the fact that:
+    - offline losses improved a lot across runs,
+    - but acceptance stayed near `0%`,
+    - iteration reduction stayed `0%`,
+    - and baseline was not clearly beaten overall
+
+  What I want in the final answer:
+  1. A short “current project state” summary.
+  2. A proposed report outline.
+  3. A LaTeX-ready report draft.
+  4. A short list:
+     - `safe claims`
+     - `claims to avoid`
+
+  Constraints:
+  - Do not fabricate numbers.
+  - Use repo numbers whenever possible.
+  - If a result is only from a small smoke benchmark, say that explicitly.
+  - If something is still uncertain, say so.
+  - Prefer precise, restrained language over hype.
+
+
+
+
+Final Report Submission
+Your final report should be between 6 - 8 pages using the ICML template. After the class, we will post all the final reports online so that you can read about each others work. If you do not want your final report to be posted online, then please let us know when you submit your writeup.
+You should include a brief statement on the contributions of different members of the team in the report. Team members will normally g et the same grade, but we reserve the right to differentiate in egregious cases.
+
+
+Submit your final report by following the Submission Instructions. For the late day policy please see here.
+
+Report. The following is a suggested structure for the report:
+Title, Author(s).
+Abstract: It should not be more than 300 words.
+Introduction: This section introduces your problem, and the overall plan for approaching your problem.
+Background/Related Work: This section discusses relevant literature for your project.
+Approach: Algorithms used or developed.
+Theoretical results (if relevant): Include assumptions, proof sketches.
+Experiment results (if relevant): Details on experiments done. The goal is to describe in enough detail that the results are reproducible.
+Conclusion: What have you learned ? Suggest future ideas.
+References: This is absolutely necessary.
+
+Supplementary Material is not counted towards your 6-8 page limit.
+Examples of things to put in your supplementary material:
+Full proof details (if doing a project with theoretical results).
+Cool videos, interactive visualizations, demos, etc. (optional)
+Examples of things to not put in your supplementary material:
+All used submodules (Theano, Caffe, CoreNLP) source code.
+Any code that is larger than 1MB.
+Model checkpoints.
+A computer virus.
+Additional Submission Requirements
+Please also include the following when you submit your project report to Gradescope
+List in your report PDF all the authors that contributed to your work, at a co-author level. This will often include people not enrolled in CS234, such as research collaborators (other graduate students, undergraduates, postdocs, research fellows or faculty advisors that helped develop your algorithm, contributed code to the project, engaged in significant idea development or feedback). All authors and their institutional/organizational affiliation and email should be listed directly under the title in your PDF, and please include a footnote to specify which authors were or were not enrolled in CS234.
+If you have some project contributors that are not part of the class please also include at the end of your manuscript, the following information:
+Specify the role and participation of non-CS 234 contributors (discussion, writing code, paper writing, statistical analysis, etc). As an example, see the author contributions for AlphaGo (Nature, 2016).
+Indicate if the project has been submitted to a peer-reviewed conference or journal. If so, please Include the full name and acronym of the conference (if applicable). This is applicable only if your paper has already been submitted to the journal/conference before our CS234 report deadline.
+Information about how to access your source code used in your project. This includes both code you developed for the project, any CS234 code, and any open-source software. If you do not wish to release your source code publically, you can create a private gitrepo that is shared only with the course staff. If your code relies on private organizational software that cannot be shared beyond the organization, contact us via Piazza by the project milestone deadline.
