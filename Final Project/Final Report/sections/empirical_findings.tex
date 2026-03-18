@@ -1,0 +1,55 @@
+\section{Empirical Findings}
+\label{sec:empirical_findings}
+
+The central empirical result of the project is that substantial offline validation improvements did not translate into a measurable downstream warm-start advantage.
+
+This section reports three complementary views of deployment. First, the default-gate benchmark tests whether DT warm-starts help in the intended pipeline, where only low-burden rollouts are accepted. Second, a relaxed-gate diagnostic tests whether the negative result is explained only by conservative rejection. Third, a small final smoke test checks whether the same conclusion persists for the best offline model after the main correctness fixes. Throughout, we distinguish \emph{solver-only} runtime from \emph{total} runtime: a DT rollout may slightly reduce the nonlinear solver’s raw solve time while still increasing end-to-end runtime once warm-start inference is included.
+
+\subsection{Offline modeling improved substantially}
+
+Across later training runs, offline validation performance improved materially relative to the earlier baseline models. Larger-context training reduced sequence-model error, and subsequent targeted fine-tuning on repair and failure-conditioned data further improved validation loss. These trends suggest that the DT successfully learned more of the structure present in the optimizer-generated trajectories, especially when training data was augmented to reflect rollout-relevant corrections.
+
+From an offline modeling perspective, the failure-conditioned runs were therefore the strongest models in the study. If offline sequence quality were a reliable proxy for downstream warm-start utility, these later models would be the leading candidates for deployment benefit. Figure~\ref{fig:train-loss} shows a representative training curve for one of the later fine-tuning runs and supports the narrower claim that training remained stable under the later configuration.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.78\linewidth]{postproj_ft2_train_loss_curves.png}
+\caption{Training action-loss curve for the post-projection fine-tune. The figure is included only as evidence that the later fine-tuning configuration trained stably.}
+\label{fig:train-loss}
+\end{figure}
+
+\subsection{Improved offline performance did not yield warm-start utility}
+
+Despite these offline gains, the deployment results do not show a convincing improvement over the baseline solver initialization. Under the default acceptance gate, warm-start acceptance remained near zero for the main DT variants, which meant that the downstream solver usually fell back to the baseline initializer. In this regime, solver iterations remained unchanged relative to baseline, and although raw solver time was sometimes slightly lower, total runtime was typically worse once DT inference time was included.
+
+This mismatch between offline improvement and deployment utility is the main empirical lesson of the paper. The learned models became better predictors of optimizer-generated trajectories under offline evaluation, but this did not place the downstream solver in a meaningfully better operating region during deployment. Representative corrected deployment numbers are reported in Table~\ref{tab:headline_results}.
+
+\begin{table*}[t]
+\centering
+\caption{Representative downstream results on the Oval track. The first two rows use the corrected 10-scenario default-gate obstacle benchmark. The next two rows use corrected 10-scenario relaxed-gate diagnostics, shown only to test whether low acceptance alone explains the negative result. The final row is a 3-scenario default-gate smoke benchmark for the failure-conditioned model after the major correctness fixes. Negative Solve $\Delta$ means lower \emph{solver-only} runtime than baseline; positive Total $\Delta$ means slower \emph{end-to-end} runtime once DT inference is included.}
+\label{tab:headline_results}
+\begin{tabular}{lccccc}
+\toprule
+Model / Evaluation Setting & Val. Loss & Accept. & Iter. $\Delta$ & Solve $\Delta$ & Total $\Delta$ \\
+\midrule
+Parent DT (default gate, obstacle benchmark) & 0.002835 & 0\% & 0.0 & $-2.34$s & $+0.36$s \\
+Post-proj. FT (default gate, obstacle benchmark) & 0.003170 & 0\% & 0.0 & $-1.90$s & $+0.73$s \\
+Post-proj. FT (relaxed gate, no-obstacle diagnostic) & 0.003170 & 20\% & $+15.0$ & $+0.06$s & $+2.92$s \\
+Post-proj. FT (relaxed gate, obstacle diagnostic) & 0.003170 & 20\% & $+25.3$ & $+1.55$s & $+4.43$s \\
+Failure-conditioned FT (default gate, obstacle smoke test) & 0.002364 & 0\% & 0.0 & $-2.38$s & $+0.33$s \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Relaxed acceptance did not recover solver benefit}
+
+A natural alternative explanation is that the default wrapper gate was simply too strict. To test this, a relaxed-gate diagnostic was used to admit some trajectories that would otherwise have been rejected. This increased warm-start acceptance, showing that the default gate was not the only barrier to solver handoff.
+
+However, the accepted relaxed-gate trajectories still did not reduce solver work on average. On the corrected 10-scenario gates, acceptance increased to 20\%, but mean solver iterations increased from 191.8 to 206.8 on the no-obstacle gate and from 230.7 to 256.0 on the obstacle gate. Total runtime also remained above baseline once inference cost was included. This result is important because it shows that warm-start acceptance alone is not enough. The learned trajectory must not only pass the wrapper, but must place the solver close enough to a useful basin of attraction to reduce the downstream optimization burden.
+
+\subsection{Qualitative rollout behavior}
+
+A useful complement to the quantitative tables is a qualitative comparison between the raw DT rollout and the solver-refined trajectory on an obstacle scenario. Figure~\ref{fig:raw_vs_refined} shows a representative obstacle case from the final failure-conditioned evaluation. The DT rollout captures the broad maneuver, but it remains offset from the solver-refined obstacle-avoidance line, illustrating why visually plausible rollouts can still fail to provide a useful warm-start.
+
+\subsection{Summary of empirical findings}
+
+Taken together, the experiments support three conclusions. First, larger-context and targeted fine-tuning improve offline sequence modeling. Second, those gains do not translate into a convincing solver-facing advantage under the corrected deployment benchmarks. Third, the gap is not explained solely by a conservative acceptance gate, since relaxed acceptance admits some trajectories without recovering downstream benefit.

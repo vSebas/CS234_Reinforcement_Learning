@@ -4,7 +4,12 @@
 \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc}
+\graphicspath{{../../Stanford Poster/figures/project/}}
 
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
@@ -34,18 +39,13 @@
 
 \input{../sections/abstract}
 \input{../sections/introduction}
-\input{../sections/background_related_work}
-\input{../sections/problem_setup}
-\input{../sections/method}
-\input{../sections/data_and_training_pipeline}
-\input{../sections/evaluation_protocol}
-\input{../sections/results}
-\input{../sections/debugging_and_diagnosis}
-\input{../sections/discussion}
-\input{../sections/limitations}
-\input{../sections/conclusion}
+\input{../sections/approach}
+\input{../sections/experimental_setup.tex}
+\input{../sections/empirical_findings.tex}
+\input{../sections/failure_analysis.tex}
+\input{../sections/limitations.tex}
+\input{../sections/conclusion.tex}
 \input{../sections/author_contributions_and_code_availability}
-\input{../sections/suggested_figures}
 
 \bibliography{final_project_report}
 \bibliographystyle{icml2018}

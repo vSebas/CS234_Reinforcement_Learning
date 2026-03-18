@@ -1,0 +1,111 @@
+\section{Approach}
+\label{sec:approach}
+
+\subsection{Optimal control problem}
+
+The downstream planner solves a nonlinear minimum-time trajectory optimization problem for a racing vehicle on a closed track with optional static circular obstacles. The optimizer uses a nonlinear single-track vehicle model with load-transfer states and Fiala brush tire forces, parameterized to the Volkswagen Golf GTI test vehicle used in prior Stanford autonomous-racing studies \cite{subosits2020road,subosits2021fidelity}. The dynamic-model implementation reused and adapted prior Dynamics Design Lab vehicle-model code, and the optimization layer was implemented in Python with CasADi \cite{andersson2019casadi} and the FATROP solver path used in the final project phase. The project assumes dry-asphalt operating conditions, consistent with the nominal tire-model setting used in this planning stack. The problem is posed in the spatial domain and discretized by direct collocation over a horizon of $N=120$ nodes on the Oval track. The benchmark geometry is shown in Figure~\ref{fig:oval-map}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.88\linewidth]{figures/oval_track_map_dims.png}
+\caption{Oval-track benchmark geometry, with length of 260\,m and track width of 6\,m.}
+\label{fig:oval-map}
+\end{figure}
+
+Let the state and control at node $k$ be
+\[
+\begin{aligned}
+x_k &= [u_{x,k},\,u_{y,k},\,r_k,\,\Delta F_{z,\ell,k},\,\Delta F_{z,a,k},\,t_k,\,e_k,\,d\psi_k]^\top \\
+u_k &= [\delta_k,\,F_{x,k}]^\top
+\end{aligned}
+\]
+The optimal control problem can then be described as
+\[
+\begin{aligned}
+\min_{\{x_k,u_k\}} \quad &
+t_N
++ \lambda_u \sum_{k=0}^{N-1}\|u_{k+1}-u_k\|_2^2 \\
+\text{s.t.}\quad
+& x_{k+1} = x_k + \frac{\Delta s}{2}\bigl(f_k + f_{k+1}\bigr), \\
+& u_{x,\min} \le u_{x,k} \le u_{x,\max}, \\
+& \dot s_k \ge \varepsilon_s, \qquad 1-\kappa_k e_k \ge \varepsilon_\kappa, \\
+& -w_k+b_{\mathrm{trk}} \le e_k \le w_k-b_{\mathrm{trk}}, \\
+& -\delta_{\max}\le \delta_k \le \delta_{\max}, \\
+& F_{x,\min}\le F_{x,k}\le F_{x,\max}, \\
+& d^2_{k,j} \ge \rho_j^2, \qquad j\in\mathcal J_k, \\
+& t_0 = 0, \qquad x_{0,i} = \bar x_{0,i}, \quad i\in\mathcal I_0 .
+\end{aligned}
+\]
+Here $f_k = f_s(x_k,u_k;\kappa_k,\theta_k,\phi_k)$ denotes the spatial vehicle dynamics evaluated at node $k$, and
+\[
+\dot s_k =
+\frac{u_{x,k}\cos d\psi_k - u_{y,k}\sin d\psi_k}{1-\kappa_k e_k}.
+\]
+The shorthand $d^2_{k,j}$ denotes the squared distance from the vehicle position $p(s_k,e_k)$ to obstacle $j$. The effective obstacle radius is
+\[
+\rho_j = r^{(j)}_{\mathrm{obs}} + r_{\mathrm{veh}}
+\]
+with the safety margin absorbed into the obstacle-clearance buffer used in the implementation.
+
+The state components are body-frame longitudinal and lateral velocity $(u_x,u_y)$, yaw rate $r$, longitudinal and lateral load-transfer states $(\Delta F_{z,\ell},\Delta F_{z,a})$, elapsed time $t$, lateral track error $e$, and heading error $d\psi$ relative to the track centerline. The objective combines terminal time with a small control-difference regularizer. The constraints enforce collocation dynamics, forward progress, Frenet regularity, track limits, actuator bounds, and node-level obstacle clearance. In the implementation, obstacle clearance is also checked at intermediate segment samples. The Decision Transformer does not replace this optimizer; instead, it predicts an initial state-control rollout that is either accepted and passed to the solver or rejected and replaced by the baseline initializer.
+
+\subsection{Decision Transformer formulation}
+
+The learned model is a Decision Transformer trained offline on expert trajectories produced by the optimizer. Following the sequence-modeling view of offline control \cite{chen2021decision}, each trajectory is represented as a sequence of conditioning and prediction tokens derived from solver-generated rollouts. The DT is trained with a supervised autoregressive objective to predict the trajectory quantities needed to reconstruct a warm-start over the planning horizon.
+
+The final model used in this project is a causal transformer with context length 50, 6 transformer layers, 4 attention heads, and embedding dimension 192. The model is trained on fixed offline datasets only; there is no online environment interaction or policy improvement loop. This is why the method is best understood as an offline RL approach implemented through sequence modeling rather than through value-function or policy-gradient machinery.
+
+The return-to-go used for conditioning is defined from the spatial trajectory timing. If $\Delta t_k$ is the time increment associated with segment $k$, the per-step reward is
+\[
+r_k = -\Delta t_k,
+\]
+and the return-to-go at step $k$ is
+\[
+R_k = \sum_{j=k}^{N-1} r_j = -\sum_{j=k}^{N-1}\Delta t_j.
+\]
+Thus, larger return-to-go corresponds to less remaining traversal time. At training time, the model receives windows extracted from expert trajectories and is optimized to minimize next-token prediction error over the chosen trajectory representation. At deployment time, the model is rolled out autoregressively, so the relevant evaluation criterion is not teacher-forced prediction accuracy but solver-facing warm-start utility.
+
+\subsection{DT warm-starting for autonomous racing}
+
+At deployment time, the DT is used as a warm-start generator. Given the scenario context and the selected conditioning inputs, the model autoregressively produces a candidate trajectory over the planning horizon. This candidate is then passed through a wrapper that performs rollout validation and optional projection before deciding whether the warm-start should be submitted to the nonlinear solver.
+
+The wrapper serves two purposes. First, it filters out clearly invalid trajectories whose rollout violates basic feasibility or produces large geometric inconsistencies. Second, it optionally applies simple corrective projections intended to reduce avoidable local errors before solver handoff. The resulting warm-start is accepted only if it satisfies a gate based on rollout validity and geometric burden. When the learned rollout is rejected, the system falls back to the baseline initialization used by the solver.
+
+This architecture preserves the role separation between learning and optimization. The DT supplies a structured initial guess; the solver remains responsible for satisfying hard constraints and refining the final trajectory. The overall warm-start pipeline is illustrated in Figure~\ref{fig:architecture}. The main empirical question is whether the learned initialization improves the operating point of the downstream optimizer relative to the baseline initializer.
+
+\begin{figure}[t]
+    \centering
+    \begin{tikzpicture}[
+        node distance=0.75cm,
+        layer/.style={rectangle, draw, rounded corners, minimum height=0.72cm, text width=0.85\linewidth, align=center, font=\tiny, very thick},
+        token/.style={font=\tiny},
+        arrow/.style={->, >=stealth, thick}
+    ]
+    \node[layer, fill=red!10] (opt) {Constrained optimization: FATROP};
+    \node[layer, fill=gray!12, below=of opt] (dyn) {Dynamics rollout};
+    \node[layer, fill=blue!18, below=of dyn] (dt) {Decision Transformer warm-start model};
+
+    \node[token, below=0.15cm of dt.south west, anchor=north east] (rtg) {$R(t_i)$};
+    \node[token, right=0.35cm of rtg] (ctx) {track / obstacle context};
+    \node[token, right=0.35cm of ctx] (state) {$x(t_i)$};
+    \node[token, right=0.35cm of state] (act) {$u(t_i)$};
+    \draw[arrow] (rtg.north) -- (dt.south west);
+    \draw[arrow] (ctx.north) -- ($(dt.south west)!0.33!(dt.south east)$);
+    \draw[arrow] (state.north) -- ($(dt.south west)!0.58!(dt.south east)$);
+    \draw[arrow] (act.north) -- ($(dt.south west)!0.80!(dt.south east)$);
+
+    \draw[arrow] ($(dt.north)+(0,0.0)$) -- node[right, font=\scriptsize] {$\hat{u}(t_i), \hat{u}(t_{i+1}), \dots$} (dyn.south);
+    \draw[arrow] ($(dyn.north)+(0,0.0)$) -- node[right, font=\scriptsize, align=center] {accepted warm start} (opt.south);
+    \draw[arrow] ($(opt.north)+(0,0.0)$) -- ++(0,0.45) node[right, font=\scriptsize] {feasible minimum-time trajectory};
+    \end{tikzpicture}
+    \caption{Warm-start architecture used in this project. Offline solver-generated trajectories train the DT. At deployment, the DT generates an autoregressive candidate trajectory that is validated, optionally projected, and either accepted as the solver warm-start or replaced by the baseline initializer.}
+    \label{fig:architecture}
+\end{figure}
+
+\subsection{Targeted repair-data fine-tuning}
+
+A central challenge in warm-starting is that autoregressive deployment exposes errors that are weakly represented in nominal expert data. To address this mismatch, the training pipeline augments the original optimizer-generated dataset with targeted repair data.
+
+The first class of interventions consists of repair trajectories generated from states or segments where rollout quality degrades, so that the model is exposed to corrective behavior beyond the nominal distribution. A second class includes post-projection data, which is intended to align the model with the corrected trajectories produced by the wrapper. A final class uses failure-conditioned shards built from rollout failures observed under deployment, with the goal of concentrating supervision on the errors most responsible for rejection or poor solver handoff.
+
+These interventions are not intended to change the downstream optimization problem. Instead, they test whether training on deployment-relevant corrections can reduce the gap between offline imitation quality and warm-start utility. The final comparison therefore focuses on whether such fine-tuning improves solver-facing metrics, not only validation loss.

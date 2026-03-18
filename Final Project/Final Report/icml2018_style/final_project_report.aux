@@ -1,2 +1,37 @@
 \relax 
-\gdef \@abspage@last{1}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{kapania2015sequential,subosits2020road,subosits2021fidelity,wachter2006implementation}
+\citation{chen2021decision}
+\citation{guffanti2024art,celestini2024transformermpc}
+\citation{kapania2015sequential,subosits2020road,subosits2021fidelity}
+\citation{chen2021decision}
+\citation{guffanti2024art,celestini2024transformermpc}
+\citation{subosits2020road,subosits2021fidelity}
+\citation{andersson2019casadi}
+\newlabel{sec:approach}{{2}{2}{}{section.2}{}}
+\newlabel{fig:oval-map}{{1}{2}{Oval-track benchmark geometry, with length of 260\,m and track width of 6\,m}{figure.1}{}}
+\citation{chen2021decision}
+\newlabel{fig:architecture}{{2}{3}{Warm-start architecture used in this project. Offline solver-generated trajectories train the DT. At deployment, the DT generates an autoregressive candidate trajectory that is validated, optionally projected, and either accepted as the solver warm-start or replaced by the baseline initializer}{figure.2}{}}
+\newlabel{tab:training_summary}{{1}{4}{Representative training progression across the main DT variants. Validation loss is the best logged value for each checkpoint}{table.1}{}}
+\newlabel{sec:experimental_setup}{{3}{4}{}{section.3}{}}
+\newlabel{sec:empirical_findings}{{4}{4}{}{section.4}{}}
+\newlabel{tab:experiment_params}{{2}{5}{Main experiment parameters for the final Oval-track benchmark. Vehicle parameters come from the GTI model configuration used throughout the project}{table.2}{}}
+\newlabel{fig:train-loss}{{3}{5}{Training action-loss curve for the post-projection fine-tune. The figure is included only as evidence that the later fine-tuning configuration trained stably}{figure.3}{}}
+\newlabel{tab:headline_results}{{3}{6}{Representative downstream results on the Oval track. The first two rows use the corrected 10-scenario default-gate obstacle benchmark. The next two rows use corrected 10-scenario relaxed-gate diagnostics, shown only to test whether low acceptance alone explains the negative result. The final row is a 3-scenario default-gate smoke benchmark for the failure-conditioned model after the major correctness fixes. Negative Solve $\Delta $ means lower \emph {solver-only} runtime than baseline; positive Total $\Delta $ means slower \emph {end-to-end} runtime once DT inference is included}{table.3}{}}
+\newlabel{sec:failure_analysis}{{5}{6}{}{section.5}{}}
+\bibdata{final_project_report}
+\bibcite{andersson2019casadi}{{1}{2019}{{Andersson et~al.}}{{Andersson, Gillis, Horn, Rawlings, and Diehl}}}
+\bibcite{celestini2024transformermpc}{{2}{2024}{{Celestini et~al.}}{{Celestini, Gammelli, Guffanti, D'Amico, Capello, and Pavone}}}
+\bibcite{chen2021decision}{{3}{2021}{{Chen et~al.}}{{Chen, Lu, Rajeswaran, Lee, Grover, Laskin, Abbeel, Srinivas, and Mordatch}}}
+\bibcite{guffanti2024art}{{4}{2024}{{Guffanti et~al.}}{{Guffanti, Gammelli, D'Amico, and Pavone}}}
+\newlabel{fig:raw_vs_refined}{{4}{7}{Representative obstacle-avoidance comparison between the DT rollout and the solver-refined trajectory from the final failure-conditioned evaluation}{figure.4}{}}
+\newlabel{sec:limitations}{{6}{7}{}{section.6}{}}
+\newlabel{sec:conclusion}{{7}{7}{}{section.7}{}}
+\bibcite{kapania2015sequential}{{5}{2015}{{Kapania et~al.}}{{Kapania, Subosits, and Gerdes}}}
+\bibcite{subosits2020road}{{6}{2020}{{Subosits \& Gerdes}}{{Subosits and Gerdes}}}
+\bibcite{subosits2021fidelity}{{7}{2021}{{Subosits \& Gerdes}}{{Subosits and Gerdes}}}
+\bibcite{wachter2006implementation}{{8}{2006}{{Waechter \& Biegler}}{{Waechter and Biegler}}}
+\bibstyle{icml2018}
+\gdef \@abspage@last{8}

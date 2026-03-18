@@ -1,0 +1,50 @@
+\begin{thebibliography}{8}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Andersson et~al.(2019)Andersson, Gillis, Horn, Rawlings, and Diehl]{andersson2019casadi}
+Andersson, J. A.~E., Gillis, J., Horn, G., Rawlings, J.~B., and Diehl, M.
+\newblock {CasADi}: A software framework for nonlinear optimization and optimal control.
+\newblock \emph{Mathematical Programming Computation}, 11\penalty0 (1):\penalty0 1--36, 2019.
+
+\bibitem[Celestini et~al.(2024)Celestini, Gammelli, Guffanti, D'Amico, Capello, and Pavone]{celestini2024transformermpc}
+Celestini, D., Gammelli, D., Guffanti, T., D'Amico, S., Capello, E., and Pavone, M.
+\newblock Transformer-based model predictive control: Trajectory optimization via sequence modeling.
+\newblock \emph{IEEE Robotics and Automation Letters}, 9\penalty0 (11):\penalty0 9820--9827, 2024.
+
+\bibitem[Chen et~al.(2021)Chen, Lu, Rajeswaran, Lee, Grover, Laskin, Abbeel, Srinivas, and Mordatch]{chen2021decision}
+Chen, L., Lu, K., Rajeswaran, A., Lee, K., Grover, A., Laskin, M., Abbeel, P., Srinivas, A., and Mordatch, I.
+\newblock Decision transformer: Reinforcement learning via sequence modeling.
+\newblock In \emph{Advances in Neural Information Processing Systems}, volume~34, pp.\  15084--15097, 2021.
+
+\bibitem[Guffanti et~al.(2024)Guffanti, Gammelli, D'Amico, and Pavone]{guffanti2024art}
+Guffanti, T., Gammelli, D., D'Amico, S., and Pavone, M.
+\newblock Transformers for trajectory optimization with application to spacecraft rendezvous.
+\newblock In \emph{IEEE Aerospace Conference}, pp.\  1--15. IEEE, 2024.
+
+\bibitem[Kapania et~al.(2015)Kapania, Subosits, and Gerdes]{kapania2015sequential}
+Kapania, N.~R., Subosits, J., and Gerdes, J.~C.
+\newblock A sequential two-step algorithm for fast generation of vehicle racing trajectories.
+\newblock In \emph{Proceedings of the ASME Dynamic Systems and Control Conference}, 2015.
+\newblock DSCC2015-9757.
+
+\bibitem[Subosits \& Gerdes(2020)Subosits and Gerdes]{subosits2020road}
+Subosits, J.~K. and Gerdes, J.~C.
+\newblock From the racetrack to the road: Real-time trajectory replanning for autonomous driving.
+\newblock \emph{IEEE Transactions on Intelligent Vehicles}, 2020.
+
+\bibitem[Subosits \& Gerdes(2021)Subosits and Gerdes]{subosits2021fidelity}
+Subosits, J.~K. and Gerdes, J.~C.
+\newblock Impacts of model fidelity on trajectory optimization for autonomous vehicles in extreme maneuvers.
+\newblock \emph{IEEE Transactions on Intelligent Vehicles}, 6\penalty0 (3):\penalty0 546--557, 2021.
+\newblock \doi{10.1109/TIV.2021.3051325}.
+
+\bibitem[Waechter \& Biegler(2006)Waechter and Biegler]{wachter2006implementation}
+Waechter, A. and Biegler, L.~T.
+\newblock On the implementation of an interior-point filter line-search algorithm for large-scale nonlinear programming.
+\newblock \emph{Mathematical Programming}, 106\penalty0 (1):\penalty0 25--57, 2006.
+
+\end{thebibliography}

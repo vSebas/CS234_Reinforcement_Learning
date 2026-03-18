@@ -1,13 +1,10 @@
 \section{Limitations}
+\label{sec:limitations}
 
-This project has several limitations that materially affect interpretation.
+The conclusions of this project should be interpreted in light of several limitations. First, the empirical evaluation is deliberately narrow in scope. The experiments focus on a single racing setting with a fixed vehicle model, limited benchmark families, and relatively small corrected deployment suites. A larger and more diverse benchmark set would strengthen the generality of the conclusions.
 
-\begin{itemize}
-\item Many final downstream comparisons are small smoke benchmarks, especially the final post-fix failure-conditioned rerun with only 3 scenarios per gate.
-\item Most completed controlled evaluations are IPOPT diagnostics, not full FATROP deployment benchmarks, even though FATROP-clean data generation was the active dataset pipeline.
-\item Acceptance depends on a hand-designed threshold gate, and some projection metrics are aggregate wrapper diagnostics rather than physically clean control-theoretic quantities.
-\item The evaluation output's \texttt{lap\_time} field corresponds to optimizer objective value rather than pure terminal time, so it should not be over-interpreted.
-\item The final failure-conditioned shard contains only 300 accepted segments, which is enough for a targeted fine-tune but still small relative to the shift shard.
-\end{itemize}
+Second, the deployment pipeline depends on a hand-designed wrapper that performs validation, optional projection, and acceptance gating before solver handoff. Although relaxed-gate diagnostics help separate gate conservatism from rollout quality, the precise choice of wrapper logic still influences the observed acceptance and failure patterns.
 
-Because of these limitations, the strongest safe conclusion is not that DT warm-starting fails in general, but that the implemented system in this repo did not yet produce a convincing solver-facing win on the final corrected benchmarks.
+Third, the final diagnosis is based on observed rollout behavior and solver-facing metrics rather than on a formal theoretical characterization of optimizer basins or autoregressive error propagation. The claim that early lateral rollout behavior is the dominant bottleneck is therefore an evidence-based empirical interpretation rather than a formal proof.
+
+These limitations weaken the strength of any broad positive or negative generalization, but they do not overturn the central result of the paper: in the corrected experiments reported here, improved offline sequence-model quality did not yield a convincing downstream warm-start benefit.

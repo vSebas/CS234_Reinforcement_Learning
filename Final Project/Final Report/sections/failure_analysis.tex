@@ -1,0 +1,29 @@
+\section{Failure Analysis}
+\label{sec:failure_analysis}
+
+\subsection{Corrected evaluations did not change the final conclusion}
+
+Several implementation and evaluation issues were identified and corrected during the project, including benchmark confounds and rollout-validation inconsistencies. These fixes mattered because some intermediate readings were either too optimistic or too pessimistic. After the corrected evaluation path was established, however, the overall conclusion did not change: no DT variant showed a clear downstream warm-start advantage over the baseline initializer.
+
+This point matters because it distinguishes the final result from a simple implementation failure. The project did not stop at an inconclusive benchmark; the evaluation pipeline was revised and the main deployment tests were repeated. The conclusions reported here are therefore based on the corrected system rather than on preliminary intermediate results.
+
+\subsection{Early lateral rollout behavior explains the remaining gap}
+
+The strongest remaining explanation for the deployment gap is that the DT still makes poor early lateral commitments under autoregressive rollout. In practice, this appears as trajectories that move to the wrong side of the track or obstacle geometry too early, or with a lateral magnitude that is too aggressive to be solver-useful. These errors are often exposed downstream as repeated projection burden, clipping, or wrapper rejection.
+
+This diagnosis is more specific than generic instability. The later models do not primarily fail because the rollout is globally incoherent everywhere; instead, they often fail because the trajectory enters the wrong local region early in the horizon. Once that happens, later corrections are not sufficient to produce a warm-start that helps the solver. Even accepted trajectories can remain solver-harmful if their early geometry is inconsistent with the basin the optimizer would otherwise exploit.
+
+Figure~\ref{fig:raw_vs_refined} provides a representative qualitative example. The DT rollout captures the broad maneuver but commits early to the wrong lateral branch or moves outward too aggressively, after which clipping and projection expose the mismatch.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{scenario000_obs3_compare.png}
+    \caption{Representative obstacle-avoidance comparison between the DT rollout and the solver-refined trajectory from the final failure-conditioned evaluation.}
+    \label{fig:raw_vs_refined}
+\end{figure}
+
+\subsection{Implications for evaluating learned warm-starts}
+
+This failure mode explains why offline validation loss was a weak predictor of deployment success. Average sequence-model improvement does not guarantee that the rollout makes the right early geometric decisions under autoregressive deployment. In warm-starting applications, these local early-horizon choices can matter more than aggregate token-level accuracy.
+
+More broadly, the results suggest that evaluating learned warm-starts requires deployment metrics that directly measure solver utility. Validation loss, acceptance rate, and even qualitative rollout plausibility can all improve without yielding reduced downstream optimization cost. In this project, the main unresolved challenge is therefore not generic forecasting quality, but early lateral basin selection under rollout.

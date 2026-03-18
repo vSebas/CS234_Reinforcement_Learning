@@ -1,38 +1,40 @@
 \section{Results}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{fatrop_oval_obstacles_traj.png}
+\caption{Representative FATROP solution on the Oval track with obstacles. These feasible, obstacle-avoiding trajectories are the source of the offline expert data used for DT training.}
+\label{fig:oval-fatrop}
+\end{figure}
+
 \subsection{Offline Training Improved, But Deployment Did Not}
 
-The strongest offline checkpoint in the final repo state is the failure-conditioned fine-tune, which reduced validation loss from the parent run's $0.002835$ to $0.002364$. The lateral-weighted fine-tune also improved over the parent to $0.002773$. By contrast, the post-projection FT2 rerun was worse offline than the parent ($0.003170$).
+The clearest positive result is that the training pipeline improved substantially over the course of the study. The strongest offline model was the failure-conditioned fine-tune, which reduced validation loss from $0.002835$ for the larger-context parent model to $0.002364$. The lateral-stability fine-tune also improved over the parent to $0.002773$, showing that targeted data and loss design were effective at fitting the expert distribution. Figure~\ref{fig:train-loss} shows a representative training curve for one of the later fine-tuning runs, and Figure~\ref{fig:oval-fatrop} shows the type of feasible obstacle-avoiding trajectories used to generate the offline supervision.
 
-This ranking does not match deployment behavior. The repo's own analysis identifies \texttt{oval\_fatrop\_improved\_postproj\_ft2\_rerun + projection=soft} as the strongest DT operating point before the failure-conditioned run, even though it was not the best offline model. This is a useful negative result: the project found a meaningful gap between offline imitation metrics and warm-start utility.
+The central limitation is that this offline ranking did not match deployment behavior. The strongest completed warm-start setting before the failure-conditioned run was the post-projection fine-tune with moderate projection, even though it was not the best offline model. This gap between offline imitation quality and warm-start utility is one of the main empirical findings of the report.
 
-\subsection{Completed Projection Ablation}
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.78\linewidth]{postproj_ft2_train_loss_curves.png}
+\caption{Training action-loss curve for the post-projection fine-tune. Training remained stable under the larger-context DT configuration used for the later fine-tuning experiments.}
+\label{fig:train-loss}
+\end{figure}
 
-A completed 10-scenario-per-gate projection ablation compared the parent improved checkpoint and the post-projection FT2 rerun under \texttt{off}, \texttt{soft}, and \texttt{full} projection modes. The repo's final verdict was:
-\begin{itemize}
-\item best parent regime: \texttt{full},
-\item best FT2 regime: \texttt{soft},
-\item best DT operating point overall: FT2 + \texttt{soft},
-\item no DT variant beat the baseline once warm-start inference time was included,
-\item acceptance remained $0\%$ for all default-gate runs,
-\item iteration reduction remained $0\%$ for all runs.
-\end{itemize}
+\subsection{Best Deployment Setting Still Fell Short of an End-to-End Win}
 
-For example, on the 10-scenario obstacle gate, FT2 + \texttt{soft} had baseline solve time $54.48$s, DT solve time $52.58$s, but DT total time $55.21$s with $0\%$ warm-start acceptance. Similar behavior held on the no-obstacle gate.
+A completed 10-scenario-per-gate ablation compared the larger-context parent model and the post-projection fine-tune under different levels of post-rollout correction. The best deployment setting among these runs was the post-projection fine-tune with moderate projection. In that setting, the optimizer could sometimes converge slightly faster from the DT proposal than from the baseline initializer. On the 10-scenario obstacle benchmark, for example, baseline solve time was $54.48$s while DT solve time was $52.58$s.
 
-\subsection{Corrected Relaxed-Gate Diagnostic}
+That improvement was not enough to change the end-to-end conclusion. Once warm-start inference time was included, DT total time rose to $55.21$s, and acceptance remained $0\%$ under the default gate. Iteration reduction also remained $0\%$ across the completed default-gate ablation runs. In other words, the learned warm-starts were sometimes promising enough to help the solver locally, but not yet reliable enough to produce a robust full-pipeline gain.
 
-After fixing the repeated-start confound, the corrected relaxed-gate diagnostic for FT2 + \texttt{soft} showed that acceptance was not literally impossible. On the corrected 10-scenario evaluation:
+\subsection{Relaxed Acceptance Increased Use of DT Warm-Starts}
+
+After fixing the repeated-start confound, a corrected relaxed-gate diagnostic for the post-projection fine-tune with \texttt{projection=soft} showed that acceptance was not literally impossible. On the corrected 10-scenario evaluation:
 \begin{itemize}
 \item no-obstacle gate: acceptance $20\%$, baseline solve time $49.06$s, DT total time $51.98$s, iterations $206.8$ vs baseline $191.8$;
 \item obstacle gate: acceptance $20\%$, baseline solve time $56.36$s, DT total time $60.79$s, iterations $256.0$ vs baseline $230.7$.
 \end{itemize}
 
-These runs are important because they separate two claims:
-\begin{enumerate}
-\item the default gate was partly suppressing acceptance;
-\item even when acceptance is relaxed, the accepted DT rollouts were still not solver-helpful on average.
-\end{enumerate}
+These runs show that useful trajectory structure was present in the learned proposals: acceptance rose to $20\%$ on both corrected gates once the rejection logic was relaxed. At the same time, the accepted proposals still did not reduce solver work on average. The implication is that acceptance alone is not the relevant success criterion; accepted warm-starts must also reduce total optimization effort.
 
 \subsection{Final Post-Fix Smoke Benchmark}
 
@@ -40,8 +42,11 @@ The final post-fix smoke rerun focused on the failure-conditioned model, after t
 
 \begin{table}[t]
 \centering
-\caption{Final post-fix smoke benchmark for \texttt{oval\_fatrop\_failure\_ft + projection=soft}. Each gate has only 3 scenarios.}
+\caption{Final post-fix smoke benchmark for the failure-conditioned fine-tune with \texttt{projection=soft}. Each gate has only 3 scenarios.}
 \label{tab:final-smoke}
+\small
+\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{lcccccc}
 \toprule
 Gate & Baseline Solve & DT Solve & DT Total & Iterations (DT/Base) & WS Accept & Fallback Mean \\
@@ -50,12 +55,11 @@ No obstacle & 47.91s & 46.34s & 49.04s & 186.3 / 186.3 & 0\% & 0.0 \\
 1--4 obstacles & 64.85s & 62.47s & 65.18s & 280.7 / 280.7 & 0\% & 1.0 \\
 \bottomrule
 \end{tabular}
+\par}
 \end{table}
 
-These results are consistent with the overall project conclusion. The DT sometimes lowers raw solve time slightly, but once warm-start inference is included, total time is still not better than baseline. More importantly, warm-start acceptance remains $0\%$, and iteration reduction remains $0\%$.
+These smoke results are consistent with the overall project conclusion. The DT sometimes lowers raw solve time slightly, but once warm-start inference is included, total time is still not better than baseline. More importantly, warm-start acceptance remains $0\%$, and iteration reduction remains $0\%$.
 
-\subsection{Projection Burden in the Final Smoke Benchmark}
+\subsection{Final Smoke Tests Support the Same Picture}
 
-The final failure-conditioned smoke rerun also shows why acceptance remained at $0\%$. On the no-obstacle gate, the mean projection total magnitude was $127.29$, the mean max-step projection was $4.91$, and the mean projection fraction was $0.628$. On the obstacle gate, the corresponding values were $121.03$, $4.90$, and $0.544$. These exceed the default gate thresholds even though fallback was already greatly reduced.
-
-This is an important qualitative shift. Earlier failure patterns were dominated by fallback-heavy instability; the final post-fix runs often fail without much fallback at all.
+The final failure-conditioned smoke rerun also helps explain why acceptance remained at $0\%$. Projection burden stayed above the default gate: on the no-obstacle gate, mean projection total magnitude was $127.29$ and mean max-step projection was $4.91$; on the obstacle gate, the corresponding values were $121.03$ and $4.90$. This is still a useful result. Earlier failures were often dominated by immediate fallback, whereas the final corrected pipeline produced trajectories that were more structured and more stable, but still not laterally accurate enough to be admitted under the default deployment rule.
